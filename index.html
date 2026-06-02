@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Tu Experiencia — Anfiteatro de Villa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --dark: #0e0e0e;
+      --dark-2: #161616;
+      --cream: #f5f0e8;
+      --muted: rgba(245,240,232,0.5);
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html {
+      height: 100%;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+
+    body {
+      height: 100%;
+      width: 100%;
+      background: var(--dark);
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 100% 55% at 50% 0%, rgba(201,168,76,0.13) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      position: absolute;
+      z-index: 1;
+      width: 100%;
+      max-width: 390px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+    .screen.exit-up {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
+    /* ── ORNAMENT ── */
+    .ornament {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: up 0.6s ease 0.05s forwards;
+    }
+    .line { width: 28px; height: 1px; background: var(--gold); opacity: 0.5; }
+    .ornament span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    /* ── BRAND ── */
+    .brand {
+      opacity: 0;
+      animation: up 0.6s ease 0.12s forwards;
+      margin-bottom: 20px;
+    }
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 34px;
+      color: var(--cream);
+      line-height: 1.1;
+    }
+    .brand-loc {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 22px;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 44px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin-bottom: 26px;
+      opacity: 0;
+      animation: up 0.6s ease 0.18s forwards;
+    }
+
+    /* ── QUESTION ── */
+    /* PRIMARIO (ES): Playfair Display grande + cream brillante */
+    .question-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--cream);
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: up 0.6s ease 0.22s forwards;
+    }
+    /* SECUNDARIO (EN): Lato chico + muted */
+    .question-sub {
+      font-family: 'Lato', sans-serif;
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1.3;
+      color: rgba(245,240,232,0.5);
+      letter-spacing: 0.02em;
+      margin-bottom: 36px;
+      opacity: 0;
+      animation: up 0.6s ease 0.28s forwards;
+    }
+
+    /* ── YES BUTTON ── */
+    .btn-yes {
+      width: 100%;
+      min-height: 74px;
+      background: var(--gold);
+      color: var(--dark);
+      border: none;
+      border-radius: 10px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s, transform 0.15s;
+      box-shadow: 0 6px 28px rgba(201,168,76,0.38);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 22px;
+      opacity: 0;
+      animation: up 0.6s ease 0.34s forwards;
+    }
+    .btn-yes:active { opacity: 0.85; transform: scale(0.98); }
+    .btn-yes-sub {
+      font-size: 12px;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      opacity: 0.65;
+    }
+
+    /* ── NO LINK ── */
+    .btn-no {
+      display: inline-flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 300;
+      background: none;
+      border: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      padding: 8px 16px;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      animation: up 0.6s ease 0.42s forwards;
+      transition: color 0.15s;
+      max-width: 100%;
+    }
+    .btn-no > span {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(245,240,232,0.25);
+      flex: 0 1 auto;
+    }
+    .btn-no .btn-no-es { color: var(--cream); font-size: 13px; }
+    .btn-no .btn-no-en { font-size: 13px; opacity: 0.7; }
+    .btn-no .btn-no-sep {
+      text-decoration: none;
+      flex: 0 0 auto;
+      opacity: 0.35;
+    }
+    .btn-no:active { color: var(--cream); }
+
+    /* ── FEEDBACK SCREEN ── */
+    .btn-back {
+      align-self: flex-start;
+      background: none;
+      border: none;
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 8px 0;
+      margin-bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s;
+      letter-spacing: 0.04em;
+    }
+    .btn-back:active { opacity: 0.6; }
+    .btn-back-arrow { font-size: 16px; line-height: 1; }
+    .btn-back-en {
+      font-size: 10px;
+      font-weight: 400;
+      opacity: 0.5;
+      letter-spacing: 0.02em;
+      text-transform: none;
+    }
+
+    .feedback-header {
+      margin-bottom: 22px;
+    }
+    .feedback-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    .feedback-sub {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.65;
+    }
+    .feedback-private-note {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 11px;
+      color: rgba(201,168,76,0.6);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── STAR RATING ── */
+    .stars-label {
+      width: 100%;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .stars-input {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    .star-btn {
+      font-size: 38px;
+      color: rgba(255,255,255,0.12);
+      background: none;
+      border: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.12s, transform 0.12s;
+      padding: 2px;
+      line-height: 1;
+    }
+    .star-btn.active { color: var(--gold); }
+    .star-btn:active { transform: scale(1.25); }
+
+    /* ── TEXTAREA ── */
+    .feedback-textarea {
+      width: 100%;
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: 'Lato', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--cream);
+      resize: none;
+      min-height: 118px;
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .feedback-textarea::placeholder { color: var(--muted); }
+    .feedback-textarea:focus { border-color: rgba(201,168,76,0.4); }
+
+    .char-counter {
+      width: 100%;
+      text-align: right;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: -10px;
+      margin-bottom: 14px;
+      font-weight: 300;
+    }
+
+    .btn-submit {
+      width: 100%;
+      min-height: 60px;
+      background: var(--dark-2);
+      color: var(--cream);
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 10px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-submit:active { background: rgba(201,168,76,0.08); }
+
+    /* ── THANKS SCREEN ── */
+    #screen-thanks {
+      gap: 0;
+    }
+    .thanks-icon {
+      font-size: 52px;
+      margin-bottom: 22px;
+      opacity: 0;
+      animation: pop 0.5s ease 0.1s forwards;
+    }
+    .thanks-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 12px;
+      opacity: 0;
+      animation: up 0.5s ease 0.2s forwards;
+    }
+    .thanks-body {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.7;
+      opacity: 0;
+      animation: up 0.5s ease 0.3s forwards;
+    }
+    .thanks-en {
+      display: block;
+      margin-top: 10px;
+      font-size: 11px;
+      color: rgba(245,240,232,0.5);
+      opacity: 1;
+    }
+    .thanks-stars {
+      display: flex;
+      gap: 10px;
+      margin-top: 28px;
+      opacity: 0;
+      animation: up 0.5s ease 0.5s forwards;
+    }
+    .thanks-star {
+      color: var(--gold);
+      font-size: 22px;
+      opacity: 0;
+      animation: pop 0.3s ease backwards;
+    }
+    .thanks-star:nth-child(1){animation-delay:0.7s}
+    .thanks-star:nth-child(2){animation-delay:0.78s}
+    .thanks-star:nth-child(3){animation-delay:0.86s}
+    .thanks-star:nth-child(4){animation-delay:0.94s}
+    .thanks-star:nth-child(5){animation-delay:1.02s}
+
+    /* ── ANIMATIONS ── */
+    @keyframes up {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes pop {
+      from { opacity:0; transform:scale(0.4); }
+      to   { opacity:1; transform:scale(1); }
+    }
+
+    /* ── SMALL SCREENS ── */
+    @media (max-height: 640px) {
+      .brand-name { font-size: 28px; }
+      .brand-loc  { font-size: 18px; }
+      .brand      { margin-bottom: 14px; }
+      .ornament   { margin-bottom: 16px; }
+      .divider    { margin-bottom: 18px; }
+      .question-text { font-size: 22px; }
+      .question-sub  { font-size: 14px; margin-bottom: 24px; }
+      .btn-yes    { min-height: 62px; font-size: 16px; margin-bottom: 16px; }
+      .star-btn   { font-size: 32px; }
+      .feedback-textarea { min-height: 96px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     PANTALLA 1 · PREGUNTA
+══════════════════════════════════════ -->
+<div class="screen" id="screen-question">
+
+  <div class="ornament">
+    <div class="line"></div>
+    <span>Las Cavernas del Cañón</span>
+    <div class="line"></div>
+  </div>
+
+  <div class="brand">
+    <div class="brand-name">Anfiteatro de Villa</div>
+    <div class="brand-loc">Ciudad Colón, Costa Rica</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h1 class="question-text">¿Recomendarías esta experiencia?</h1>
+  <p class="question-sub">Would you recommend this experience?</p>
+
+  <button class="btn-yes" onclick="goYes()">
+    <span>Sí, la recomendaría ✦</span>
+    <span class="btn-yes-sub">Yes, I'd recommend it</span>
+  </button>
+
+  <button class="btn-no" onclick="goNo()">
+    <span class="btn-no-es">No del todo — tengo comentarios</span>
+    <span class="btn-no-sep" aria-hidden="true">·</span>
+    <span class="btn-no-en">Not quite — I have some feedback</span>
+  </button>
+
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PANTALLA 2 · FEEDBACK PRIVADO
+══════════════════════════════════════ -->
+<div class="screen hidden" id="screen-feedback">
+
+  <button class="btn-back" onclick="goBack()" aria-label="Volver">
+    <span class="btn-back-arrow" aria-hidden="true">←</span>
+    <span>Volver</span>
+    <span class="btn-back-en">Back</span>
+  </button>
+
+  <div class="feedback-header">
+    <h2 class="feedback-title">Tu opinión cuenta</h2>
+    <p style="font-family:'Lato',sans-serif;font-size:13px;color:rgba(245,240,232,0.5);font-weight:300;margin-top:2px;margin-bottom:14px;letter-spacing:0.02em;">Your voice matters</p>
+    <p class="feedback-sub" style="color:var(--cream);">
+      Contanos qué podríamos mejorar.<br>
+      <span style="display:block;margin-top:2px;font-size:11px;color:rgba(245,240,232,0.5);">Tell us what we could improve.</span>
+      <span class="feedback-private-note">✦ Esto llega directo al equipo, no a Google.<br><span style="display:block;font-size:10px;font-weight:300;opacity:0.75;margin-top:2px;">✦ This goes directly to the team, not to Google.</span></span>
+    </p>
+  </div>
+
+  <div class="stars-label">¿Cuántas estrellas nos das?<br><span style="display:block;font-size:10px;font-weight:300;color:rgba(245,240,232,0.5);letter-spacing:0.02em;margin-top:2px;">How many stars would you give us?</span></div>
+  <div class="stars-input" id="star-input">
+    <button class="star-btn" onclick="setStar(1)">★</button>
+    <button class="star-btn" onclick="setStar(2)">★</button>
+    <button class="star-btn" onclick="setStar(3)">★</button>
+    <button class="star-btn" onclick="setStar(4)">★</button>
+    <button class="star-btn" onclick="setStar(5)">★</button>
+  </div>
+
+  <textarea
+    class="feedback-textarea"
+    id="feedback-text"
+    placeholder="¿Qué podríamos mejorar? / What could we improve?"
+    maxlength="400"
+    oninput="updateCounter()"
+  ></textarea>
+  <div class="char-counter"><span id="char-count">0</span> / 400</div>
+
+  <button class="btn-submit" onclick="submitFeedback()">
+    <span>Enviar al equipo →</span> <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0.02em;opacity:0.6;"> &nbsp;Send to the team</span>
+  </button>
+
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PANTALLA 3 · GRACIAS
+══════════════════════════════════════ -->
+<div class="screen hidden" id="screen-thanks">
+
+  <div class="thanks-icon">🙏</div>
+  <h2 class="thanks-title">Gracias por tu sinceridad</h2>
+  <p style="font-family:'Lato',sans-serif;font-size:13px;color:rgba(245,240,232,0.5);font-weight:300;margin-top:2px;margin-bottom:12px;letter-spacing:0.02em;text-align:center;">Thank you for your honesty</p>
+  <p class="thanks-body" style="color:var(--cream);">
+    Significa mucho para nosotros.
+    <span class="thanks-en">Tu feedback va directo al equipo. Lo tomamos muy en serio para seguir mejorando.<br><span style="display:block;font-size:10px;opacity:0.7;margin-top:4px;">Your feedback goes directly to the team. We take it very seriously to keep improving.</span></span>
+  </p>
+
+  <div class="thanks-stars">
+    <span class="thanks-star">★</span>
+    <span class="thanks-star">★</span>
+    <span class="thanks-star">★</span>
+    <span class="thanks-star">★</span>
+    <span class="thanks-star">★</span>
+  </div>
+
+  <!-- DISCOUNT CODE (shown after feedback) -->
+  <div id="thanks-code-wrap" style="display:none; margin-top:28px; width:100%; opacity:0; animation: up 0.5s ease 1.2s forwards;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);opacity:0.8;margin-bottom:10px;">
+      🎁 Tu código de 15% de descuento
+    </div>
+    <div id="thanks-code-box" onclick="copyThanksCode()" style="background:rgba(201,168,76,0.1);border:1.5px solid rgba(201,168,76,0.45);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+      <span id="thanks-code-text" style="font-family:'Lato',monospace;font-size:22px;font-weight:700;letter-spacing:0.12em;color:var(--gold);">—</span>
+      <span style="font-size:18px;">📋</span>
+    </div>
+    <div id="thanks-copy-hint" style="font-size:11px;color:var(--gold);opacity:0;text-align:center;margin-top:6px;letter-spacing:0.08em;text-transform:uppercase;transition:opacity 0.3s;">✓ Copiado</div>
+    <div style="font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;text-align:center;margin-top:10px;">
+      Válido en tu próxima visita · Lo podés compartir.<br>
+      <span style="font-size:10px;opacity:0.75;">Valid for your next visit · You can share it.</span>
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+  // ── Pegá acá la URL de tu Apps Script Web App ──────────────────
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzX_CJ18adp-bHzhXJfFrXr9MIG5WtYVsNSknn_dDUJnkz8WGOoriN7LuEDKUoLbeEQJg/exec';
+  // ──────────────────────────────────────────────────────────────
+
+  let selectedStars = 0;
+
+  /* Envía evento al sheet (fire-and-forget, no bloquea la UI) */
+  function ping(type, extra) {
+    if (!SCRIPT_URL || SCRIPT_URL === 'PEGAR_URL_AQUI') return;
+    var url = SCRIPT_URL + '?action=event&type=' + type + (extra || '');
+    fetch(url, { mode: 'no-cors' }).catch(function() {});
+  }
+
+  /* Envía feedback privado al sheet */
+  function sendFeedback(stars, comment) {
+    if (!SCRIPT_URL || SCRIPT_URL === 'PEGAR_URL_AQUI') return;
+    var url = SCRIPT_URL
+      + '?action=feedback&stars=' + stars
+      + '&comment=' + encodeURIComponent(comment);
+    fetch(url, { mode: 'no-cors' }).catch(function() {});
+  }
+
+  /* ── SÍ ── */
+  function goYes() {
+    // localStorage (fallback local)
+    const cur = parseInt(localStorage.getItem('anfi_gate_yes') || '0');
+    localStorage.setItem('anfi_gate_yes', cur + 1);
+    localStorage.setItem('anfi_gate_last', new Date().toISOString());
+    // Sheet
+    ping('gate_yes');
+    window.location.href = '/review?from=gate';
+  }
+
+  /* ── NO ── */
+  function goNo() {
+    const cur = parseInt(localStorage.getItem('anfi_gate_no') || '0');
+    localStorage.setItem('anfi_gate_no', cur + 1);
+    // Sheet
+    ping('gate_no');
+    transition('screen-question', 'screen-feedback');
+  }
+
+  /* ── VOLVER ── */
+  function goBack() {
+    ping('gate_back');
+    transition('screen-feedback', 'screen-question');
+  }
+
+  /* ── ESTRELLAS ── */
+  function setStar(n) {
+    selectedStars = n;
+    document.querySelectorAll('.star-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i < n);
+    });
+  }
+
+  /* ── CONTADOR ── */
+  function updateCounter() {
+    const t = document.getElementById('feedback-text');
+    document.getElementById('char-count').textContent = t.value.length;
+  }
+
+  /* ── ENVIAR FEEDBACK ── */
+  function submitFeedback() {
+    const text = document.getElementById('feedback-text').value.trim();
+
+    if (selectedStars === 0 && text === '') {
+      document.getElementById('feedback-text').focus();
+      document.getElementById('feedback-text').style.borderColor = 'rgba(224,92,92,0.5)';
+      setTimeout(() => {
+        document.getElementById('feedback-text').style.borderColor = '';
+      }, 1200);
+      return;
+    }
+
+    // localStorage
+    const feed = JSON.parse(localStorage.getItem('anfi_feedback') || '[]');
+    feed.unshift({ stars: selectedStars, comment: text, ts: new Date().toISOString() });
+    if (feed.length > 200) feed.pop();
+    localStorage.setItem('anfi_feedback', JSON.stringify(feed));
+    localStorage.setItem('anfi_gate_last', new Date().toISOString());
+
+    // Sheet
+    sendFeedback(selectedStars, text);
+
+    // Transicion a thanks; el codigo se resuelve cuando responde el server
+    document.getElementById('thanks-code-wrap').style.display = 'none';
+    transition('screen-feedback', 'screen-thanks');
+
+    // Pedir codigo: si el limite mensual esta alcanzado, no se entrega
+    const code = generateDiscountCode();
+    pingCode(code, 'feedback', function(result) {
+      if (result && result.status === 'limit_reached') {
+        document.getElementById('thanks-code-wrap').style.display = 'none';
+      } else {
+        document.getElementById('thanks-code-text').textContent = code;
+        document.getElementById('thanks-code-wrap').style.display = 'block';
+      }
+    });
+  }
+
+  /* ── CÓDIGO DE DESCUENTO ── */
+  function generateDiscountCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'ANFI15-';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  // Solicitud de codigo con respuesta: backend chequea limite mensual.
+  // onResult(data) recibe { status:'ok', code } o { status:'limit_reached' }.
+  function pingCode(code, source, onResult) {
+    if (!SCRIPT_URL || SCRIPT_URL === 'PEGAR_URL_AQUI') {
+      if (onResult) onResult({ status: 'ok', code: code });
+      return;
+    }
+    fetch(SCRIPT_URL + '?action=save_code&code=' + encodeURIComponent(code) + '&source=' + encodeURIComponent(source))
+      .then(function(r) { return r.json(); })
+      .then(function(data) { if (onResult) onResult(data || { status: 'ok', code: code }); })
+      .catch(function() { if (onResult) onResult({ status: 'ok', code: code }); });
+  }
+
+  function copyThanksCode() {
+    const code = document.getElementById('thanks-code-text').textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(showThanksCopied).catch(showThanksCopied);
+    } else { showThanksCopied(); }
+  }
+
+  function showThanksCopied() {
+    const hint = document.getElementById('thanks-copy-hint');
+    hint.style.opacity = '1';
+    setTimeout(() => { hint.style.opacity = '0'; }, 2000);
+  }
+
+  /* ── TRANSICIÓN ── */
+  function transition(fromId, toId) {
+    const from = document.getElementById(fromId);
+    const to   = document.getElementById(toId);
+    from.classList.add('exit-up');
+    setTimeout(() => {
+      from.classList.add('hidden');
+      from.classList.remove('exit-up');
+      to.classList.remove('hidden');
+    }, 340);
+  }
+</script>
+
+</body>
+</html>

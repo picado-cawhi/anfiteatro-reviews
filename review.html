@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Dejá tu Reseña — Anfiteatro de Villa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --ta-green: #00AA6C;
+      --dark: #0e0e0e;
+      --cream: #f5f0e8;
+      --muted: rgba(245,240,232,0.5);
+    }
+
+    html {
+      height: 100%;
+      /* Prevent bounce scroll on iOS */
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+
+    body {
+      height: 100%;
+      width: 100%;
+      background: var(--dark);
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Safe area for notched phones */
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 100% 55% at 50% 0%, rgba(201,168,76,0.13) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    /* ── CARD ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 390px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0;
+    }
+
+    /* ── ORNAMENT ── */
+    .ornament {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: up 0.6s ease 0.05s forwards;
+    }
+    .line { width: 28px; height: 1px; background: var(--gold); opacity: 0.5; }
+    .ornament span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    /* ── BRAND ── */
+    .brand {
+      opacity: 0;
+      animation: up 0.6s ease 0.12s forwards;
+      margin-bottom: 20px;
+    }
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 34px;
+      color: var(--cream);
+      line-height: 1.1;
+    }
+    .brand-loc {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 24px;
+      color: var(--gold);
+      margin-top: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 44px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin-bottom: 22px;
+      opacity: 0;
+      animation: up 0.6s ease 0.18s forwards;
+    }
+
+    /* ── HEADLINE ── */
+    .headline {
+      opacity: 0;
+      animation: up 0.6s ease 0.22s forwards;
+      margin-bottom: 6px;
+    }
+    /* PRIMARIO (ES) */
+    .headline h1 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+    /* SECUNDARIO (EN) */
+    .headline .es {
+      font-family: 'Lato', sans-serif;
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1.3;
+      color: rgba(245,240,232,0.5);
+      letter-spacing: 0.02em;
+      margin-top: 3px;
+    }
+
+    /* PRIMARIO (ES) */
+    .subline {
+      opacity: 0;
+      animation: up 0.6s ease 0.28s forwards;
+      font-size: 15px;
+      color: var(--cream);
+      font-weight: 400;
+      line-height: 1.6;
+      margin-bottom: 32px;
+      padding: 0 4px;
+    }
+    /* SECUNDARIO (EN) */
+    .subline .es {
+      display: block;
+      font-size: 11px;
+      color: rgba(245,240,232,0.5);
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      opacity: 1;
+      margin-top: 4px;
+    }
+
+    /* ── BUTTONS ── */
+    .buttons {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      opacity: 0;
+      animation: up 0.6s ease 0.36s forwards;
+      margin-bottom: 36px;
+    }
+
+    .btn {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      align-items: center;
+      gap: 12px;
+      min-height: 72px;
+      padding: 0 20px;
+      border-radius: 10px;
+      border: none;
+      text-decoration: none;
+      font-family: 'Lato', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 14px;
+      /* Prevent text selection on tap */
+      -webkit-user-select: none;
+      user-select: none;
+      /* Remove tap highlight on mobile */
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      cursor: pointer;
+    }
+    .btn:active {
+      opacity: 0.85;
+      transform: scale(0.98);
+    }
+
+    .btn-label {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.15;
+    }
+    /* PRIMARIO (ES) */
+    .btn-label-main {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 1;
+    }
+    /* SECUNDARIO (EN) */
+    .btn-label-sub {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    .btn-google {
+      background: var(--gold);
+      color: var(--dark);
+      box-shadow: 0 6px 24px rgba(201,168,76,0.35);
+    }
+
+    .btn-ta {
+      background: var(--ta-green);
+      color: white;
+      box-shadow: 0 6px 24px rgba(0,170,108,0.3);
+    }
+
+    /* Fixed-width icon container — BOTH buttons have same 56px icon zone
+       so text always starts at the exact same horizontal position */
+    .btn-icon-wrap {
+      width: 56px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .google-badge {
+      background: white;
+      border-radius: 50%;
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .google-badge svg { width: 20px; height: 20px; }
+
+    .ta-logo {
+      width: 42px; height: 30px;
+    }
+
+    /* ── STARS ── */
+    .stars {
+      display: flex; gap: 10px;
+      opacity: 0;
+      animation: up 0.6s ease 0.5s forwards;
+    }
+    .star {
+      color: var(--gold);
+      font-size: 24px;
+      opacity: 0;
+      animation: pop 0.3s ease backwards;
+    }
+    .star:nth-child(1){animation-delay:0.7s}
+    .star:nth-child(2){animation-delay:0.78s}
+    .star:nth-child(3){animation-delay:0.86s}
+    .star:nth-child(4){animation-delay:0.94s}
+    .star:nth-child(5){animation-delay:1.02s}
+
+    /* ── ANIMS ── */
+    @keyframes up {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes pop {
+      from { opacity:0; transform:scale(0.3); }
+      to   { opacity:1; transform:scale(1); }
+    }
+
+    /* ── VERY SMALL SCREENS (e.g. iPhone SE) ── */
+    @media (max-height: 620px) {
+      .ornament { margin-bottom: 14px; }
+      .brand { margin-bottom: 12px; }
+      .brand-name { font-size: 28px; }
+      .divider { margin-bottom: 12px; }
+      .headline h1 { font-size: 24px; }
+      .headline .es { font-size: 14px; }
+      .subline { margin-bottom: 20px; font-size: 13px; }
+      .subline .es { font-size: 10px; }
+      .buttons { gap: 10px; margin-bottom: 20px; }
+      .btn { min-height: 64px; font-size: 15px; }
+    }
+
+    /* ── CODE MODAL ── */
+    .code-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(14,14,14,0.92);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+    }
+    .code-overlay.show { display: flex; }
+    .code-modal {
+      width: 100%;
+      max-width: 350px;
+      background: #161616;
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 16px;
+      padding: 28px 24px 24px;
+      text-align: center;
+      animation: pop 0.35s ease forwards;
+    }
+    .code-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+    .code-sub {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+    .code-box {
+      background: rgba(201,168,76,0.1);
+      border: 1.5px solid rgba(201,168,76,0.5);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .code-text {
+      font-family: 'Lato', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+    }
+    .code-copy-btn {
+      font-size: 18px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.15s;
+    }
+    .code-copy-btn:active { transform: scale(1.3); }
+    .code-copied-hint {
+      font-size: 11px;
+      color: var(--gold);
+      opacity: 0;
+      margin-bottom: 18px;
+      transition: opacity 0.3s;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .code-note {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+    .btn-continue {
+      width: 100%;
+      min-height: 58px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .btn-continue:active { opacity: 0.85; transform: scale(0.98); }
+    .btn-continue.google { background: var(--gold); color: var(--dark); box-shadow: 0 4px 20px rgba(201,168,76,0.35); }
+    .btn-continue.ta     { background: var(--ta-green); color: white; box-shadow: 0 4px 20px rgba(0,170,108,0.3); }
+    .btn-continue-sub { font-size: 10px; font-weight: 400; opacity: 0.6; text-transform: none; letter-spacing: 0.02em; display: block; margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <div class="ornament">
+    <div class="line"></div>
+    <span>Las Cavernas del Cañón</span>
+    <div class="line"></div>
+  </div>
+
+  <div class="brand">
+    <div class="brand-name">Anfiteatro de Villa</div>
+    <div class="brand-loc">Ciudad Colón, Costa Rica</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="headline">
+    <h1>¿Cómo estuvo tu experiencia?</h1>
+    <p class="es">How was your experience?</p>
+  </div>
+
+  <p class="subline">
+    Tu reseña nos ayuda a crecer. Gracias. 🙏
+    <span class="es">Your review helps us grow and lets others discover this place.</span>
+  </p>
+
+  <div class="buttons">
+
+    <button
+      class="btn btn-google"
+      onclick="showCodeModal('google','https://www.google.com/maps/place/Anfiteatro+de+Villa/@9.9286416,-84.248565,17z/data=!4m8!3m7!1s0x8fa0ff39adbd42a9:0xf3283c49619efd92!8m2!3d9.9286416!4d-84.2459901!9m1!1b1!16s%2Fg%2F11cnl490jz?entry=ttu&g_ep=EgoyMDI2MDQyOS4wIKXMDSoASAFQAw%3D%3D')"
+    >
+      <div class="btn-icon-wrap">
+        <div class="google-badge">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+        </div>
+      </div>
+      <div class="btn-label">
+        <span class="btn-label-main">Reseña en Google</span>
+        <span class="btn-label-sub">Review on Google</span>
+      </div>
+    </button>
+
+    <button
+      class="btn btn-ta"
+      onclick="showCodeModal('ta','https://www.tripadvisor.com/UserReviewEdit-g3180587-d14965511-Anfiteatro_de_Villa-Ciudad_Colon_San_Jose_Metro_Province_of_San_Jose.html')"
+    >
+      <div class="btn-icon-wrap">
+        <!-- TripAdvisor owl logo — accurate recreation -->
+        <svg class="ta-logo" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+          <!-- Bridge connecting both eyes across the top -->
+          <path d="M6 38 Q50 4 94 38" stroke="white" stroke-width="9" fill="none" stroke-linecap="round"/>
+          <!-- Left wing tip -->
+          <path d="M6 38 L18 16 L28 30" fill="white"/>
+          <!-- Right wing tip -->
+          <path d="M94 38 L82 16 L72 30" fill="white"/>
+          <!-- Left eye -->
+          <circle cx="30" cy="46" r="22" fill="white"/>
+          <circle cx="30" cy="46" r="14" fill="#00AA6C"/>
+          <circle cx="30" cy="46" r="7.5" fill="white"/>
+          <circle cx="30" cy="46" r="3.5" fill="#00AA6C"/>
+          <!-- Right eye -->
+          <circle cx="70" cy="46" r="22" fill="white"/>
+          <circle cx="70" cy="46" r="14" fill="#00AA6C"/>
+          <circle cx="70" cy="46" r="7.5" fill="white"/>
+          <circle cx="70" cy="46" r="3.5" fill="#00AA6C"/>
+          <!-- Beak -->
+          <path d="M44 65 L50 75 L56 65 Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="btn-label">
+        <span class="btn-label-main">Reseña en TripAdvisor</span>
+        <span class="btn-label-sub">Review on TripAdvisor</span>
+      </div>
+    </button>
+
+  </div>
+
+  <div class="stars">
+    <span class="star">★</span>
+    <span class="star">★</span>
+    <span class="star">★</span>
+    <span class="star">★</span>
+    <span class="star">★</span>
+  </div>
+
+</div>
+
+<!-- ── CODE MODAL ── -->
+<div class="code-overlay" id="code-overlay">
+  <div class="code-modal">
+    <div class="code-title">🎉 ¡Gracias!</div>
+    <p class="code-sub" style="color:var(--cream);font-weight:400;">Aquí tenés tu código de 15% de descuento<br><span style="font-size:11px;color:rgba(245,240,232,0.5);">Here's your 15% discount code</span></p>
+    <div class="code-box" onclick="copyCode()">
+      <span class="code-text" id="modal-code">—</span>
+      <button class="code-copy-btn" onclick="copyCode()" aria-label="Copy code">📋</button>
+    </div>
+    <div class="code-copied-hint" id="copy-hint">✓ Copiado</div>
+    <p class="code-note">
+      Válido en tu próxima visita al Anfiteatro de Villa.<br>
+      Lo podés compartir con un amigo o familiar.
+      <span style="display:block;margin-top:6px;font-size:10px;color:rgba(245,240,232,0.5);font-weight:300;">
+        Valid for your next visit to Anfiteatro de Villa. You can share it with a friend or family member.
+      </span>
+    </p>
+    <button class="btn-continue" id="btn-continue" onclick="openReviewLink()">
+      Continuar a la reseña
+      <span class="btn-continue-sub" id="continue-sub">Continue to review</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzX_CJ18adp-bHzhXJfFrXr9MIG5WtYVsNSknn_dDUJnkz8WGOoriN7LuEDKUoLbeEQJg/exec';
+
+  var _reviewUrl = '';
+  var _platform  = '';
+
+  function ping(type, platform) {
+    if (!SCRIPT_URL) return;
+    fetch(SCRIPT_URL + '?action=event&type=' + type + (platform ? '&platform=' + platform : ''), { mode: 'no-cors' }).catch(function(){});
+  }
+
+  // Solicitud de codigo con respuesta: el backend chequea limite mensual
+  function pingCode(code, source, onResult) {
+    if (!SCRIPT_URL) {
+      if (onResult) onResult({ status: 'ok', code: code });
+      return;
+    }
+    fetch(SCRIPT_URL + '?action=save_code&code=' + encodeURIComponent(code) + '&source=' + encodeURIComponent(source))
+      .then(function(r) { return r.json(); })
+      .then(function(data) { if (onResult) onResult(data || { status: 'ok', code: code }); })
+      .catch(function() { if (onResult) onResult({ status: 'ok', code: code }); });
+  }
+
+  function generateCode() {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var code  = 'ANFI15-';
+    for (var i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  function showCodeModal(platform, reviewUrl) {
+    _platform  = platform;
+    _reviewUrl = reviewUrl;
+
+    // Track click
+    var key = platform === 'google' ? 'anfi_reviews_google' : 'anfi_reviews_ta';
+    localStorage.setItem(key, (parseInt(localStorage.getItem(key) || '0') + 1).toString());
+    localStorage.setItem('anfi_reviews_last', new Date().toISOString());
+    ping('click', platform);
+
+    // Setup botones del modal
+    var btn = document.getElementById('btn-continue');
+    btn.className = 'btn-continue ' + (platform === 'google' ? 'google' : 'ta');
+    document.getElementById('continue-sub').textContent = platform === 'google' ? 'Opens Google Reviews' : 'Opens TripAdvisor';
+    document.getElementById('copy-hint').style.opacity = '0';
+
+    // Generate code (placeholder hasta que confirme el server)
+    var code = generateCode();
+    localStorage.setItem('anfi_last_code_' + platform, code);
+
+    // Modal con codigo o sin codigo segun la respuesta del server
+    document.getElementById('modal-code').textContent = '—';
+    document.getElementById('code-overlay').classList.add('show');
+
+    pingCode(code, platform, function(result) {
+      var codeBox = document.querySelector('.code-box');
+      var codeNote = document.querySelector('.code-note');
+      var codeTitle = document.querySelector('.code-title');
+      var codeSub = document.querySelector('.code-sub');
+      if (result && result.status === 'limit_reached') {
+        // Sin codigo este mes — modal solo muestra "thank you" + continue
+        if (codeBox)  codeBox.style.display  = 'none';
+        if (codeNote) codeNote.style.display = 'none';
+        if (codeTitle) codeTitle.textContent = '🙏 Gracias!';
+        if (codeSub)   codeSub.innerHTML = 'Continua para dejarnos tu reseña.<br><span style="font-size:11px;color:rgba(245,240,232,0.5);">Continue to leave your review.</span>';
+      } else {
+        if (codeBox)  codeBox.style.display  = '';
+        if (codeNote) codeNote.style.display = '';
+        document.getElementById('modal-code').textContent = code;
+      }
+    });
+  }
+
+  function openReviewLink() {
+    window.open(_reviewUrl, '_blank', 'noopener');
+    document.getElementById('code-overlay').classList.remove('show');
+  }
+
+  function copyCode() {
+    var code = document.getElementById('modal-code').textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(showCopied).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  }
+
+  function fallbackCopy() {
+    var el = document.getElementById('modal-code');
+    var range = document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    try { document.execCommand('copy'); } catch(e){}
+    window.getSelection().removeAllRanges();
+    showCopied();
+  }
+
+  function showCopied() {
+    var hint = document.getElementById('copy-hint');
+    hint.style.opacity = '1';
+    setTimeout(function(){ hint.style.opacity = '0'; }, 2000);
+  }
+
+  // Register visit
+  (function(){
+    if (new URLSearchParams(window.location.search).get('from') === 'gate') {
+      var v = parseInt(localStorage.getItem('anfi_reviews_visits') || '0');
+      localStorage.setItem('anfi_reviews_visits', v + 1);
+      localStorage.setItem('anfi_reviews_last', new Date().toISOString());
+      ping('visit');
+    }
+  })();
+</script>
+</body>
+</html>

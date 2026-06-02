@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Centro de Reseñas — Anfiteatro de Villa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --copper: #C8643C;
+      --plum: #8E5BA7;
+      --teal: #00AA6C;
+      --blue: #5B8DEF;
+      --dark: #0e0e0e;
+      --dark-2: #161616;
+      --dark-3: #1e1e1e;
+      --cream: #f5f0e8;
+      --muted: rgba(245,240,232,0.5);
+      --faint: rgba(245,240,232,0.35);
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html {
+      height: 100%;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+    body {
+      height: 100%;
+      width: 100%;
+      background: var(--dark);
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 100% 40% at 50% 0%, rgba(201,168,76,0.1) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 28px 18px 36px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      margin-bottom: 22px;
+      opacity: 0;
+      animation: up 0.5s ease 0.05s forwards;
+    }
+    .team-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .team-badge::before {
+      content: '●';
+      font-size: 8px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+    .header p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 300;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 22px;
+      opacity: 0;
+      animation: up 0.5s ease forwards;
+    }
+    .section.s1 { animation-delay: 0.15s; }
+    .section.s2 { animation-delay: 0.30s; }
+
+    .section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      padding: 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label .count {
+      font-weight: 700;
+      color: var(--gold);
+      opacity: 0.7;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%;
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .card:active { transform: scale(0.99); }
+
+    .card.tour:hover     { border-color: rgba(201,168,76,0.4); }
+    .card.fontana:hover  { border-color: rgba(200,100,60,0.4); }
+    .card.evento:hover   { border-color: rgba(142,91,167,0.4); }
+    .card.servicio:hover { border-color: rgba(91,141,239,0.4); }
+    .card.dash:hover     { border-color: rgba(0,170,108,0.4); }
+
+    .card-top {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 14px 10px;
+    }
+    .card-icon {
+      width: 48px; height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .card.tour     .card-icon { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.28); }
+    .card.fontana  .card-icon { background: rgba(200,100,60,0.12); border: 1px solid rgba(200,100,60,0.28); }
+    .card.evento   .card-icon { background: rgba(142,91,167,0.12); border: 1px solid rgba(142,91,167,0.30); }
+    .card.servicio .card-icon { background: rgba(91,141,239,0.12); border: 1px solid rgba(91,141,239,0.30); }
+    .card.dash     .card-icon { background: rgba(0,170,108,0.12);  border: 1px solid rgba(0,170,108,0.30); }
+
+    .card-body { display: flex; flex-direction: column; min-width: 0; }
+    .card-tag {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .card.tour     .card-tag { color: var(--gold); }
+    .card.fontana  .card-tag { color: var(--copper); }
+    .card.evento   .card-tag { color: var(--plum); }
+    .card.servicio .card-tag { color: var(--blue); }
+    .card.dash     .card-tag { color: var(--teal); }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+    .card-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 300;
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .card-url {
+      margin: 0 14px;
+      padding: 8px 12px;
+      background: var(--dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Lato', monospace;
+      font-size: 11px;
+      color: var(--faint);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.01em;
+      overflow: hidden;
+    }
+    .card-url-text {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .card-url-text strong {
+      color: var(--cream);
+      font-weight: 700;
+      opacity: 0.85;
+    }
+
+    .card-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 10px 14px 14px;
+    }
+    .card.dash .card-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--dark-3);
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      color: var(--dark);
+    }
+    .card.tour     .btn-primary { background: var(--gold);   border-color: var(--gold); }
+    .card.fontana  .btn-primary { background: var(--copper); border-color: var(--copper); color: white; }
+    .card.evento   .btn-primary { background: var(--plum);   border-color: var(--plum); color: white; }
+    .card.servicio .btn-primary { background: var(--blue);   border-color: var(--blue); color: white; }
+    .card.dash     .btn-primary { background: var(--teal);   border-color: var(--teal); color: white; }
+
+    .btn-ghost:active {
+      background: var(--dark);
+      border-color: rgba(201,168,76,0.4);
+      color: var(--gold);
+    }
+
+    /* ── COPIED TOAST ── */
+    .toast {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(14,14,14,0.96);
+      border: 1px solid rgba(201,168,76,0.4);
+      color: var(--gold);
+      padding: 10px 18px;
+      border-radius: 24px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      z-index: 100;
+      transition: transform 0.35s ease;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      opacity: 0;
+      animation: up 0.5s ease 0.45s forwards;
+    }
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+    .footer-loc {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 11px;
+      color: var(--gold);
+      margin-top: 2px;
+      opacity: 0.7;
+    }
+    .footer-note {
+      margin-top: 10px;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 300;
+      opacity: 0.7;
+      letter-spacing: 0.04em;
+      line-height: 1.55;
+    }
+
+    @keyframes up {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    @media (max-width: 360px) {
+      .card-actions { grid-template-columns: 1fr; }
+      .card.dash .card-actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="team-badge">Panel Interno · Equipo</div>
+    <h1>Centro de Reseñas</h1>
+    <p>Anfiteatro de Villa · Todos los sistemas en un solo lugar</p>
+  </div>
+
+  <!-- ── PAGINAS PARA CLIENTES ── -->
+  <div class="section s1">
+    <div class="section-label">
+      <span>Páginas para Clientes</span>
+      <span class="count">· 4</span>
+    </div>
+
+    <!-- TOUR -->
+    <div class="card tour">
+      <div class="card-top">
+        <div class="card-icon">🗻</div>
+        <div class="card-body">
+          <div class="card-tag">Tour</div>
+          <div class="card-title">Las Cavernas del Canon</div>
+          <div class="card-sub">Filtro Si/No · Google · TripAdvisor · Codigo 15% descuento</div>
+        </div>
+      </div>
+      <div class="card-url">
+        <span class="card-url-text">anfiteatro-reviews.vercel.app<strong>/</strong></span>
+      </div>
+      <div class="card-actions">
+        <a class="btn btn-primary" href="/" target="_blank" rel="noopener" data-track="open-tour">Abrir</a>
+        <button class="btn btn-ghost" onclick="copyLink('/', 'Tour')">📋 Copiar link</button>
+      </div>
+    </div>
+
+    <!-- LA FONTANA -->
+    <div class="card fontana">
+      <div class="card-top">
+        <div class="card-icon">🍷</div>
+        <div class="card-body">
+          <div class="card-tag">Restaurante</div>
+          <div class="card-title">La Fontana del Anfiteatro</div>
+          <div class="card-sub">Servicio · Comida · Postre de cortesia</div>
+        </div>
+      </div>
+      <div class="card-url">
+        <span class="card-url-text">anfiteatro-reviews.vercel.app<strong>/restaurante</strong></span>
+      </div>
+      <div class="card-actions">
+        <a class="btn btn-primary" href="/restaurante" target="_blank" rel="noopener" data-track="open-fontana">Abrir</a>
+        <button class="btn btn-ghost" onclick="copyLink('/restaurante', 'La Fontana')">📋 Copiar link</button>
+      </div>
+    </div>
+
+    <!-- EVENTOS -->
+    <div class="card evento">
+      <div class="card-top">
+        <div class="card-icon">🎭</div>
+        <div class="card-body">
+          <div class="card-tag">Evento</div>
+          <div class="card-title">Eventos en el Anfiteatro</div>
+          <div class="card-sub">Experiencia · Servicio · Comentarios libres</div>
+        </div>
+      </div>
+      <div class="card-url">
+        <span class="card-url-text">anfiteatro-reviews.vercel.app<strong>/evento</strong></span>
+      </div>
+      <div class="card-actions">
+        <a class="btn btn-primary" href="/evento" target="_blank" rel="noopener" data-track="open-evento">Abrir</a>
+        <button class="btn btn-ghost" onclick="copyLink('/evento', 'Eventos')">📋 Copiar link</button>
+      </div>
+    </div>
+
+    <!-- SERVICIO AL CLIENTE -->
+    <div class="card servicio">
+      <div class="card-top">
+        <div class="card-icon">💬</div>
+        <div class="card-body">
+          <div class="card-tag">Atención al Cliente</div>
+          <div class="card-title">Servicio · Correo &amp; WhatsApp</div>
+          <div class="card-sub">Para evaluar atención post-consulta · sin código</div>
+        </div>
+      </div>
+      <div class="card-url">
+        <span class="card-url-text">anfiteatro-reviews.vercel.app<strong>/servicio</strong></span>
+      </div>
+      <div class="card-actions">
+        <a class="btn btn-primary" href="/servicio" target="_blank" rel="noopener" data-track="open-servicio">Abrir</a>
+        <button class="btn btn-ghost" onclick="copyLink('/servicio', 'Servicio')">📋 Copiar link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HERRAMIENTAS DEL EQUIPO ── -->
+  <div class="section s2">
+    <div class="section-label">
+      <span>Herramientas del Equipo</span>
+      <span class="count">· 1</span>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="card dash">
+      <div class="card-top">
+        <div class="card-icon">📊</div>
+        <div class="card-body">
+          <div class="card-tag">Dashboard</div>
+          <div class="card-title">Panel de Metricas</div>
+          <div class="card-sub">Estadisticas · Feedback privado · Canje de codigos</div>
+        </div>
+      </div>
+      <div class="card-url">
+        <span class="card-url-text">anfiteatro-reviews.vercel.app<strong>/dashboard</strong></span>
+      </div>
+      <div class="card-actions">
+        <a class="btn btn-primary" href="/dashboard" target="_blank" rel="noopener" data-track="open-dash">Abrir Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-brand">Anfiteatro de Villa</div>
+    <div class="footer-loc">Ciudad Colon, Costa Rica</div>
+    <p class="footer-note">
+      Guarda este link en favoritos.<br>
+      Desde aqui podes abrir o compartir cualquier pagina del sistema.
+    </p>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ Link copiado</div>
+
+<script>
+  function copyLink(path, label) {
+    var url = window.location.origin + path;
+    var done = function() {
+      var t = document.getElementById('toast');
+      t.textContent = '✓ ' + label + ' · Link copiado';
+      t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 2000);
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(done).catch(done);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = url; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch(e){}
+      document.body.removeChild(ta);
+      done();
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Estadísticas de Reseñas — Anfiteatro de Villa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --ta-green: #00AA6C;
+      --dark: #0e0e0e;
+      --dark-2: #161616;
+      --dark-3: #1e1e1e;
+      --cream: #f5f0e8;
+      --muted: rgba(245,240,232,0.45);
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html {
+      height: 100%;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+
+    body {
+      height: 100%;
+      width: 100%;
+      background: var(--dark);
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 100% 40% at 50% 0%, rgba(201,168,76,0.1) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px 40px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: up 0.5s ease 0.05s forwards;
+    }
+    .team-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .team-badge::before {
+      content: '●';
+      font-size: 8px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+    .header p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 300;
+    }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      width: 100%;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      padding-left: 2px;
+    }
+
+    /* ── STATS GRID ── */
+    .stats-section {
+      width: 100%;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: up 0.5s ease 0.15s forwards;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .stats-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--gold);
+    }
+    .stat-num.green { color: var(--ta-green); }
+    .stat-num.cream { color: var(--cream); }
+    .stat-num.red   { color: #e05c5c; }
+
+    .stat-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+    .stat-label .sub {
+      display: block;
+      font-size: 9px;
+      font-weight: 300;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      opacity: 0.65;
+      margin-top: 1px;
+    }
+
+    /* ── CONVERSION ── */
+    .conversion-section {
+      width: 100%;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: up 0.5s ease 0.25s forwards;
+    }
+    .conversion-card {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .conv-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .conv-row:last-child { margin-bottom: 0; }
+    .conv-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 300;
+    }
+    .conv-label strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 1px;
+    }
+    .conv-pct {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .conv-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .conv-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--gold);
+      transition: width 1s ease;
+    }
+    .conv-bar-fill.green { background: var(--ta-green); }
+
+    /* ── PERIOD TABS ── */
+    .period-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+    }
+    .period-tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 4px;
+      font-family: 'Lato', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.18s, color 0.18s;
+    }
+    .period-tab.active {
+      background: rgba(201,168,76,0.15);
+      color: var(--gold);
+    }
+    .analytics-section {
+      width: 100%;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: up 0.5s ease 0.3s forwards;
+    }
+    .chart-wrap {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 12px 10px;
+      margin-top: 8px;
+    }
+    .chart-title {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    /* ── LAST UPDATED ── */
+    .last-updated {
+      width: 100%;
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: up 0.5s ease 0.35s forwards;
+    }
+
+    /* ── ALERT ── */
+    .alert {
+      width: 100%;
+      background: rgba(224,92,92,0.1);
+      border: 1px solid rgba(224,92,92,0.25);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: up 0.5s ease 0.4s forwards;
+      display: none;
+    }
+    .alert.visible { display: block; }
+    .alert-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #e05c5c;
+      margin-bottom: 4px;
+    }
+    .alert-body {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    /* ── RESET BUTTON ── */
+    .reset-section {
+      width: 100%;
+      text-align: center;
+      margin-top: 4px;
+      opacity: 0;
+      animation: up 0.5s ease 0.45s forwards;
+    }
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-family: 'Lato', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-reset:active {
+      border-color: rgba(224,92,92,0.4);
+      color: #e05c5c;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 300;
+      opacity: 0;
+      animation: up 0.5s ease 0.5s forwards;
+    }
+    .footer .gold { color: var(--gold); }
+
+    @keyframes up {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- VOLVER AL MENU -->
+  <a href="/menu" class="back-to-menu" style="display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-family:'Lato',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:8px 14px;border:1px solid var(--border);border-radius:20px;background:var(--dark-2);margin-bottom:18px;transition:color 0.15s, border-color 0.15s, background 0.15s;-webkit-tap-highlight-color:transparent;">
+    <span aria-hidden="true" style="font-size:13px;line-height:1;">←</span>
+    <span>Volver al menú</span>
+  </a>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="team-badge">En Vivo · Panel Interno</div>
+    <h1>Métricas de Reseñas</h1>
+    <p>Anfiteatro de Villa · Experiencia del Cliente</p>
+  </div>
+
+  <!-- ══ EMBUDO DE SENTIMIENTO ══ -->
+  <div class="stats-section" id="sentiment-section">
+    <div class="section-label">Embudo de Sentimiento</div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num" id="s-gate-yes">0</div>
+        <div class="stat-label">
+          Sí
+          <span class="sub">Redirigidos a reseña</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-num red" id="s-gate-no">0</div>
+        <div class="stat-label">
+          No
+          <span class="sub">Feedback interno</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-num cream" id="s-gate-pct">—</div>
+        <div class="stat-label">
+          % Positivo
+          <span class="sub">De todos los escaneos</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:11px;color:var(--muted);font-weight:300;">Positivos vs. Negativos</span>
+        <span style="font-size:11px;color:var(--gold);font-weight:700;" id="s-gate-ratio">0 / 0</span>
+      </div>
+      <div style="width:100%;height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;">
+        <div id="bar-sentiment" style="height:100%;border-radius:3px;background:var(--gold);transition:width 1s ease;width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLICK STATS -->
+  <div class="stats-section">
+    <div class="section-label">Seguimiento de Clics</div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num cream" id="s-visits">0</div>
+        <div class="stat-label">
+          Visitas a la Página
+          <span class="sub">Visitas totales</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="s-google">0</div>
+        <div class="stat-label">
+          Clics
+          <span class="sub">Google</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green" id="s-ta">0</div>
+        <div class="stat-label">
+          Clics TA
+          <span class="sub">TripAdvisor</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversion rates -->
+    <div class="stats-grid-2">
+      <div class="stat">
+        <div class="stat-num" id="s-google-pct">0%</div>
+        <div class="stat-label">
+          Tasa Google
+          <span class="sub">% visitantes → Google</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green" id="s-ta-pct">0%</div>
+        <div class="stat-label">
+          Tasa TA
+          <span class="sub">% visitantes → TripAdvisor</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERSION DETAIL -->
+  <div class="conversion-section">
+    <div class="section-label">Embudo de Conversión</div>
+    <div class="conversion-card">
+      <div class="conv-row">
+        <div class="conv-label">
+          <strong>Google Reviews</strong>
+          Clics sobre total de visitas
+        </div>
+        <div class="conv-pct" id="c-google-pct">0%</div>
+      </div>
+      <div class="conv-bar">
+        <div class="conv-bar-fill" id="bar-google" style="width:0%"></div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="conv-row">
+        <div class="conv-label">
+          <strong>TripAdvisor</strong>
+          Clics sobre total de visitas
+        </div>
+        <div class="conv-pct green" id="c-ta-pct">0%</div>
+      </div>
+      <div class="conv-bar">
+        <div class="conv-bar-fill green" id="bar-ta" style="width:0%"></div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="conv-row">
+        <div class="conv-label">
+          <strong>Interacción Total</strong>
+          Cualquier botón clickeado vs visitas
+        </div>
+        <div class="conv-pct cream" id="c-total-pct">0%</div>
+      </div>
+      <div class="conv-bar">
+        <div class="conv-bar-fill" id="bar-total" style="width:0%; background: var(--cream)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ANALITICA POR PERIODO ══ -->
+  <div class="analytics-section" id="analytics-section">
+    <div class="section-label">Tendencia por Período</div>
+
+    <!-- Tabs -->
+    <div class="period-tabs">
+      <button class="period-tab active" data-period="today"  onclick="switchPeriod('today')">Hoy</button>
+      <button class="period-tab"        data-period="week"   onclick="switchPeriod('week')">Esta Semana</button>
+      <button class="period-tab"        data-period="month"  onclick="switchPeriod('month')">Este Mes</button>
+    </div>
+
+    <!-- Cards del período -->
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num cream" id="p-visits">—</div>
+        <div class="stat-label">Visitas<span class="sub">del período</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="p-positive">—</div>
+        <div class="stat-label">% Positivos<span class="sub">filtro de sentimiento</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green" id="p-clicks">—</div>
+        <div class="stat-label">Clics<span class="sub">Google + TA</span></div>
+      </div>
+    </div>
+
+    <!-- Conversiones del período -->
+    <div class="conversion-card" style="margin-top:8px;">
+      <div class="conv-row">
+        <div class="conv-label"><strong>Google Reviews</strong>Clics del período</div>
+        <div class="conv-pct" id="p-google-pct">—</div>
+      </div>
+      <div class="conv-bar"><div class="conv-bar-fill" id="p-bar-google" style="width:0%"></div></div>
+
+      <div style="height:12px"></div>
+
+      <div class="conv-row">
+        <div class="conv-label"><strong>TripAdvisor</strong>Clics del período</div>
+        <div class="conv-pct green" id="p-ta-pct">—</div>
+      </div>
+      <div class="conv-bar"><div class="conv-bar-fill green" id="p-bar-ta" style="width:0%"></div></div>
+
+      <div style="height:12px"></div>
+
+      <div class="conv-row">
+        <div class="conv-label"><strong>Conversión Total</strong>Clics / visitas del período</div>
+        <div class="conv-pct cream" id="p-total-pct">—</div>
+      </div>
+      <div class="conv-bar"><div class="conv-bar-fill" id="p-bar-total" style="width:0%;background:var(--cream)"></div></div>
+    </div>
+
+    <!-- Gráfica de tendencia -->
+    <div class="chart-wrap">
+      <div class="chart-title">Últimos 14 días · Visitas vs Clics</div>
+      <div id="chart-loading" style="text-align:center;font-size:11px;color:var(--muted);padding:30px 0;">Cargando datos del Sheet…</div>
+      <canvas id="trend-chart" height="160" style="display:none;"></canvas>
+    </div>
+  </div>
+
+  <!-- LOW ENGAGEMENT ALERT -->
+  <div class="alert" id="alert-low">
+    <div class="alert-title">⚠️ Alerta de Bajo Rendimiento</div>
+    <div class="alert-body">La tasa de clics está por debajo del 20%. Recordale al equipo que invite a los clientes a escanear el código QR.</div>
+  </div>
+
+  <!-- LAST UPDATED -->
+  <div class="last-updated" id="last-updated">Última actualización: —</div>
+
+  <!-- LINK HEALTH CHECK -->
+  <div class="stats-section" style="margin-bottom:16px; opacity:0; animation: up 0.5s ease 0.42s forwards;">
+    <div class="section-label">Estado de los Links</div>
+    <div class="conversion-card">
+      <div style="font-size:11px; color:var(--muted); font-weight:300; margin-bottom:12px; line-height:1.5;">
+        Verificá que los dos links de reseñas funcionen correctamente.<br>
+        
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <a href="https://www.google.com/maps/place/Anfiteatro+de+Villa/@9.9286416,-84.248565,17z/data=!4m8!3m7!1s0x8fa0ff39adbd42a9:0xf3283c49619efd92!8m2!3d9.9286416!4d-84.2459901!9m1!1b1!16s%2Fg%2F11cnl490jz?entry=ttu&g_ep=EgoyMDI2MDQyOS4wIKXMDSoASAFQAw%3D%3D"
+          target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:12px 14px;text-decoration:none;-webkit-tap-highlight-color:transparent;"
+          onclick="markTested('google')">
+          <div style="background:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="13" height="13" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0.04em;">Verificar Link de Google</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:300;margin-top:1px;">Abre en nueva pestaña · debe llegar al formulario de reseña</div>
+          </div>
+          <div id="status-google" style="font-size:16px;">🔗</div>
+        </a>
+        <a href="https://www.tripadvisor.com/UserReviewEdit-g3180587-d14965511-Anfiteatro_de_Villa-Ciudad_Colon_San_Jose_Metro_Province_of_San_Jose.html"
+          target="_blank" rel="noopener"
+          style="display:flex;align-items:center;gap:10px;background:rgba(0,170,108,0.08);border:1px solid rgba(0,170,108,0.2);border-radius:8px;padding:12px 14px;text-decoration:none;-webkit-tap-highlight-color:transparent;"
+          onclick="markTested('ta')">
+          <div style="flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">
+            <svg width="24" height="18" viewBox="0 0 60 44" fill="none"><circle cx="15" cy="26" r="11" fill="white" opacity="0.9"/><circle cx="45" cy="26" r="11" fill="white" opacity="0.9"/><circle cx="15" cy="26" r="5.5" fill="#00AA6C"/><circle cx="45" cy="26" r="5.5" fill="#00AA6C"/><circle cx="15" cy="26" r="2.5" fill="white"/><circle cx="45" cy="26" r="2.5" fill="white"/><path d="M10 14 C10 8 50 8 50 14" stroke="#00AA6C" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M4 14 L10 8 L16 14" stroke="#00AA6C" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M44 14 L50 8 L56 14" stroke="#00AA6C" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:var(--ta-green);letter-spacing:0.04em;">Verificar Link de TripAdvisor</div>
+            <div style="font-size:10px;color:var(--muted);font-weight:300;margin-top:1px;">Abre en nueva pestaña · debe llegar al formulario de reseña</div>
+          </div>
+          <div id="status-ta" style="font-size:16px;">🔗</div>
+        </a>
+      </div>
+      <div style="font-size:10px;color:var(--muted);font-weight:300;margin-top:10px;text-align:center;opacity:0.6;">
+        Último test: <span id="last-tested">Nunca</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CANJEAR CÓDIGO ══ -->
+  <div class="stats-section" style="margin-bottom:16px; opacity:0; animation: up 0.5s ease 0.45s forwards;">
+    <div class="section-label">Canjear Código de Descuento</div>
+    <div class="conversion-card">
+      <div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:14px;line-height:1.5;">
+        Cuando el cliente presenta su código, escribílo acá para validarlo y marcarlo como usado.<br>
+        <span style="font-size:11px;opacity:0.75;">
+          <span style="color:#C9A84C;">●</span> ANFI15-… 15% tour ·
+          <span style="color:#C8643C;">●</span> POSTRE-… postre Fontana ·
+          <span style="color:#8E5BA7;">●</span> TOUR-… tour cortesia
+        </span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input
+          id="redeem-input"
+          type="text"
+          placeholder="ANFI15-XXXXXX · POSTRE-XXXXXX · TOUR-XXXXXX"
+          maxlength="14"
+          oninput="this.value=this.value.toUpperCase()"
+          style="flex:1;background:var(--dark-2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'Lato',monospace;font-size:16px;font-weight:700;letter-spacing:0.1em;color:var(--cream);outline:none;-webkit-appearance:none;transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='rgba(201,168,76,0.45)'"
+          onblur="this.style.borderColor=''"
+        />
+        <button onclick="validateCode()" style="background:var(--gold);color:var(--dark);border:none;border-radius:8px;padding:0 18px;font-family:'Lato',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;flex-shrink:0;">
+          Validar
+        </button>
+      </div>
+      <div id="redeem-result" style="display:none;border-radius:8px;padding:12px 14px;font-size:13px;font-weight:400;line-height:1.5;"></div>
+    </div>
+  </div>
+
+  <!-- ══ FEEDBACK PRIVADO ══ -->
+  <div class="stats-section" id="feedback-section" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-label" style="margin-bottom:0;">Feedback Privado</div>
+      <div style="font-size:10px;color:var(--muted);font-weight:300;" id="feedback-count-label">Sin entradas</div>
+    </div>
+    <div id="feedback-feed" style="display:flex;flex-direction:column;gap:8px;">
+      <div id="feedback-empty" style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;">
+        Todavía no hay feedback negativo registrado.<br>
+        <span style="opacity:0.55;">Los comentarios aparecerán aquí cuando alguien toque "No".</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RESEÑAS DEL RESTAURANTE · LA FONTANA ══ -->
+  <div class="stats-section" id="restaurante-section" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-label" style="margin-bottom:0;color:#C8643C;">🍷 Reseñas · La Fontana</div>
+      <div style="font-size:10px;color:var(--muted);font-weight:300;" id="resto-count-label">Sin entradas</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num cream" id="resto-total">0</div>
+        <div class="stat-label">Reseñas<span class="sub">totales</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="resto-avg-servicio" style="color:#C8643C;">—</div>
+        <div class="stat-label">★ Servicio<span class="sub">promedio</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="resto-avg-comida" style="color:#C8643C;">—</div>
+        <div class="stat-label">★ Comida<span class="sub">promedio</span></div>
+      </div>
+    </div>
+    <div id="resto-feed" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+      <div id="resto-empty" style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;">
+        Aún no hay reseñas del restaurante.<br>
+        <span style="opacity:0.55;">Apareceran aqui cuando se envien desde /restaurante.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RESEÑAS DE EVENTOS PRIVADOS ══ -->
+  <div class="stats-section" id="evento-section" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-label" style="margin-bottom:0;color:#8E5BA7;">🎭 Reseñas · Eventos Privados</div>
+      <div style="font-size:10px;color:var(--muted);font-weight:300;" id="evento-count-label">Sin entradas</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num cream" id="evento-total">0</div>
+        <div class="stat-label">Reseñas<span class="sub">totales</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="evento-avg-evento" style="color:#8E5BA7;">—</div>
+        <div class="stat-label">★ Evento<span class="sub">promedio</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="evento-avg-servicio" style="color:#8E5BA7;">—</div>
+        <div class="stat-label">★ Servicio<span class="sub">promedio</span></div>
+      </div>
+    </div>
+    <div id="evento-feed" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+      <div id="evento-empty" style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;">
+        Aún no hay reseñas de eventos privados.<br>
+        <span style="opacity:0.55;">Bodas, cumpleanos, team buildings y citas apareceran aqui.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RESEÑAS · ATENCIÓN AL CLIENTE ══ -->
+  <div class="stats-section" id="servicio-section" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-label" style="margin-bottom:0;color:#5B8DEF;">💬 Reseñas · Atención al Cliente</div>
+      <div style="font-size:10px;color:var(--muted);font-weight:300;" id="servicio-count-label">Sin entradas</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num cream" id="servicio-total">0</div>
+        <div class="stat-label">Reseñas<span class="sub">totales</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="servicio-avg-atencion" style="color:#5B8DEF;">—</div>
+        <div class="stat-label">★ Atención<span class="sub">promedio</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="servicio-avg-resolucion" style="color:#5B8DEF;">—</div>
+        <div class="stat-label">★ Resolución<span class="sub">promedio</span></div>
+      </div>
+    </div>
+    <div id="servicio-feed" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+      <div id="servicio-empty" style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;">
+        Aún no hay reseñas de atención al cliente.<br>
+        <span style="opacity:0.55;">Apareceran aqui cuando se envien desde /servicio.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COSTO DE CORTESIAS · ESTE MES ══ -->
+  <div class="stats-section" id="courtesy-section" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-label" style="margin-bottom:0;">💰 Costo de Cortesias · <span id="courtesy-month" style="color:var(--gold);">—</span></div>
+      <div style="font-size:10px;color:var(--muted);font-weight:300;" id="courtesy-status-global">—</div>
+    </div>
+
+    <!-- Totales globales -->
+    <div class="conversion-card" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-around;align-items:center;text-align:center;">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--cream);" id="ct-total-entregado">$0</div>
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:3px;">Entregado<br>del Mes</div>
+        </div>
+        <div style="width:1px;height:48px;background:var(--border);"></div>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold);" id="ct-total-canjeado">$0</div>
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:3px;">Canjeado<br>del Mes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjetas por categoria -->
+    <div id="courtesy-cards" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+
+  <!-- ══ CONFIGURACION DE CORTESIAS ══ -->
+  <div class="stats-section" id="courtesy-config-section" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;" onclick="toggleConfigPanel()">
+      <div class="section-label" style="margin-bottom:0;">⚙️ Configuracion de Cortesias</div>
+      <div style="font-size:14px;color:var(--muted);transition:transform 0.2s;" id="config-toggle-arrow">▾</div>
+    </div>
+    <div id="config-panel" class="conversion-card" style="display:none;">
+      <div style="font-size:11px;color:var(--muted);font-weight:300;line-height:1.55;margin-bottom:14px;">
+        Define el <strong style="color:var(--cream);">costo unitario</strong> y el <strong style="color:var(--cream);">limite mensual canjeado</strong> por categoria. Cuando el canjeado del mes alcanza el limite, el sistema deja de entregar codigos nuevos.
+      </div>
+
+      <div id="config-rows" style="display:flex;flex-direction:column;gap:18px;"></div>
+
+      <button onclick="saveCourtesyConfig()" id="btn-save-config" style="width:100%;margin-top:18px;background:var(--gold);color:var(--dark);border:none;border-radius:8px;padding:12px 16px;font-family:'Lato',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+        Guardar Configuracion
+      </button>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;text-align:center;font-weight:300;" id="config-status">Sin cambios</div>
+    </div>
+  </div>
+
+  <!-- RESET -->
+  <div class="reset-section">
+    <button class="btn-reset" onclick="confirmReset()">Reiniciar Contadores</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span class="gold">Nota:</span> Los contadores se guardan en este dispositivo.<br>
+    Conectar a Google Sheets para datos compartidos.
+  </div>
+
+</div>
+
+<script>
+  // ── Pegá acá la URL de tu Apps Script Web App ──────────────────
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzX_CJ18adp-bHzhXJfFrXr9MIG5WtYVsNSknn_dDUJnkz8WGOoriN7LuEDKUoLbeEQJg/exec';
+  // ──────────────────────────────────────────────────────────────
+
+  const KEYS = {
+    visits: 'anfi_reviews_visits',
+    google: 'anfi_reviews_google',
+    ta:     'anfi_reviews_ta',
+    lastUpdated: 'anfi_reviews_last',
+    gateYes: 'anfi_gate_yes',
+    gateNo:  'anfi_gate_no',
+    feedback: 'anfi_feedback',
+    restaurante: 'anfi_restaurante',
+    evento:      'anfi_evento',
+    servicio:    'anfi_servicio',
+  };
+
+  function get(key) { return parseInt(localStorage.getItem(key) || '0', 10); }
+
+  function pct(num, denom) {
+    if (!denom) return '0%';
+    return Math.round((num / denom) * 100) + '%';
+  }
+
+  function animNum(el, target, suffix = '') {
+    const start = parseInt(el.textContent) || 0;
+    if (start === target) { el.textContent = target + suffix; return; }
+    const dur = 700, t0 = performance.now();
+    function step(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(start + (target - start) * e) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function animBar(el, targetPct) {
+    const num = parseInt(targetPct) || 0;
+    setTimeout(() => { el.style.width = Math.min(num, 100) + '%'; }, 100);
+  }
+
+  /* ── EMBUDO DE SENTIMIENTO ── */
+  function renderSentiment() {
+    const yes = get(KEYS.gateYes);
+    const no  = get(KEYS.gateNo);
+    const sum = yes + no;
+
+    animNum(document.getElementById('s-gate-yes'), yes);
+    animNum(document.getElementById('s-gate-no'),  no);
+
+    const pctEl = document.getElementById('s-gate-pct');
+    const ratio = sum ? Math.round((yes / sum) * 100) : null;
+    pctEl.textContent = ratio !== null ? ratio + '%' : '—';
+
+    document.getElementById('s-gate-ratio').textContent = yes + ' / ' + no;
+    animBar(document.getElementById('bar-sentiment'), ratio !== null ? ratio + '%' : '0%');
+  }
+
+  /* ── FEED DE FEEDBACK PRIVADO ── */
+  function renderFeedback() {
+    const feed = JSON.parse(localStorage.getItem(KEYS.feedback) || '[]');
+    const container = document.getElementById('feedback-feed');
+    const empty     = document.getElementById('feedback-empty');
+    const countLbl  = document.getElementById('feedback-count-label');
+
+    if (feed.length === 0) {
+      empty.style.display = 'block';
+      countLbl.textContent = 'Sin entradas';
+      // Remove any previously rendered cards (except empty placeholder)
+      container.querySelectorAll('.fb-card').forEach(el => el.remove());
+      return;
+    }
+
+    empty.style.display = 'none';
+    countLbl.textContent = feed.length + (feed.length === 1 ? ' entrada' : ' entradas');
+
+    // Rebuild feed (remove old cards first)
+    container.querySelectorAll('.fb-card').forEach(el => el.remove());
+
+    // Show latest 20
+    feed.slice(0, 20).forEach(function(item) {
+      const card = document.createElement('div');
+      card.className = 'fb-card';
+      card.style.cssText = 'background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;';
+
+      // Stars row
+      const starsHtml = Array.from({length: 5}, (_, i) =>
+        '<span style="color:' + (i < item.stars ? 'var(--gold)' : 'rgba(255,255,255,0.12)') + ';font-size:14px;">★</span>'
+      ).join('');
+
+      // Time
+      const d = new Date(item.ts);
+      const timeStr = d.toLocaleString('es-CR', {
+        day: '2-digit', month: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      // Comment
+      const commentHtml = item.comment
+        ? '<p style="font-size:13px;color:var(--cream);font-weight:300;line-height:1.55;margin-top:8px;opacity:0.85;">' +
+          escapeHtml(item.comment) + '</p>'
+        : '<p style="font-size:12px;color:var(--muted);font-style:italic;margin-top:6px;font-weight:300;">Sin comentario escrito</p>';
+
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          '<div>' + starsHtml + '</div>' +
+          '<span style="font-size:10px;color:var(--muted);font-weight:300;">' + timeStr + '</span>' +
+        '</div>' +
+        commentHtml;
+
+      container.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  /* ── HELPERS RESEÑAS RESTAURANTE / EVENTOS ─────────────────── */
+  function readReviewList(key) {
+    try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+    catch(e) { return []; }
+  }
+  function average(arr, field) {
+    if (!arr.length) return null;
+    var sum = 0, n = 0;
+    arr.forEach(function(x) {
+      var v = parseFloat(x[field]);
+      if (!isNaN(v) && v > 0) { sum += v; n++; }
+    });
+    return n ? (sum / n) : null;
+  }
+  function fmtAvg(v) { return v === null ? '—' : v.toFixed(1); }
+  function starsHtml(n, color) {
+    var c = color || 'var(--gold)';
+    var out = '';
+    for (var i = 0; i < 5; i++) {
+      out += '<span style="color:' + (i < n ? c : 'rgba(255,255,255,0.12)') + ';font-size:14px;">★</span>';
+    }
+    return out;
+  }
+  function fmtTime(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString('es-CR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  }
+
+  /* ── RESEÑAS RESTAURANTE ──────────────────────────────────── */
+  function renderRestaurant() {
+    var list = readReviewList(KEYS.restaurante);
+    var container = document.getElementById('resto-feed');
+    var empty     = document.getElementById('resto-empty');
+    var countLbl  = document.getElementById('resto-count-label');
+    var color     = '#C8643C';
+
+    document.getElementById('resto-total').textContent = list.length;
+    document.getElementById('resto-avg-servicio').textContent = fmtAvg(average(list, 'servicio'));
+    document.getElementById('resto-avg-comida').textContent   = fmtAvg(average(list, 'comida'));
+
+    container.querySelectorAll('.rv-card').forEach(function(el) { el.remove(); });
+
+    if (!list.length) {
+      empty.style.display = 'block';
+      countLbl.textContent = 'Sin entradas';
+      return;
+    }
+    empty.style.display = 'none';
+    countLbl.textContent = list.length + (list.length === 1 ? ' reseña' : ' reseñas');
+
+    list.slice(0, 20).forEach(function(item) {
+      var card = document.createElement('div');
+      card.className = 'rv-card';
+      card.style.cssText = 'background:var(--dark-2);border:1px solid var(--border);border-left:3px solid ' + color + ';border-radius:10px;padding:12px 14px;';
+      var cmt = item.comentario
+        ? '<p style="font-size:13px;color:var(--cream);font-weight:300;line-height:1.55;margin-top:8px;opacity:0.85;">' + escapeHtml(item.comentario) + '</p>'
+        : '<p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:6px;font-weight:300;">Sin comentario</p>';
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<div style="display:flex;gap:14px;align-items:center;">' +
+            '<div><span style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">Servicio</span>' + starsHtml(item.servicio, color) + '</div>' +
+            '<div><span style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">Comida</span>' + starsHtml(item.comida, color) + '</div>' +
+          '</div>' +
+          '<span style="font-size:10px;color:var(--muted);font-weight:300;">' + fmtTime(item.ts) + '</span>' +
+        '</div>' + cmt;
+      container.appendChild(card);
+    });
+  }
+
+  /* ── COSTO DE CORTESIAS ───────────────────────────────────── */
+
+  // Definicion de las 3 categorias (mismo orden en UI)
+  var COURTESY_CATEGORIES = [
+    { key: 'anfi15', label: 'Tour Las Cavernas (15%)',  prefix: 'ANFI15-', sourceMatches: ['google', 'ta', 'feedback'], color: '#C9A84C', icon: '💰', defaultCost: 6 },
+    { key: 'postre', label: 'Postre Fontana',           prefix: 'POSTRE-', sourceMatches: ['restaurante'],              color: '#C8643C', icon: '🍰', defaultCost: 3 },
+    { key: 'tour',   label: 'Tour Cortesia (1 persona)', prefix: 'TOUR-',  sourceMatches: ['evento'],                   color: '#8E5BA7', icon: '🎟️', defaultCost: 15 }
+  ];
+
+  var COURTESY_KEYS = {
+    config:  'anfi_courtesy_config',  // { anfi15:{cost,limit}, postre:{...}, tour:{...} }
+    summary: 'anfi_courtesy_summary'  // { entregado:{...}, canjeado:{...}, month:'YYYY-MM' }
+  };
+
+  function defaultConfig() {
+    var c = {};
+    COURTESY_CATEGORIES.forEach(function(cat) {
+      c[cat.key] = { cost: cat.defaultCost, limit: null };
+    });
+    return c;
+  }
+
+  function readCourtesyConfig() {
+    try {
+      var c = JSON.parse(localStorage.getItem(COURTESY_KEYS.config) || 'null');
+      if (!c) return defaultConfig();
+      // Merge defaults para keys faltantes
+      var merged = defaultConfig();
+      Object.keys(merged).forEach(function(k) {
+        if (c[k]) {
+          if (typeof c[k].cost  === 'number') merged[k].cost  = c[k].cost;
+          if (c[k].limit === null || typeof c[k].limit === 'number') merged[k].limit = c[k].limit;
+        }
+      });
+      return merged;
+    } catch(e) { return defaultConfig(); }
+  }
+
+  function readCourtesySummary() {
+    try {
+      var s = JSON.parse(localStorage.getItem(COURTESY_KEYS.summary) || 'null');
+      if (!s) return { month: monthKey(), entregado: {}, canjeado: {} };
+      // Si el cache es de otro mes, reset
+      if (s.month !== monthKey()) return { month: monthKey(), entregado: {}, canjeado: {} };
+      return s;
+    } catch(e) { return { month: monthKey(), entregado: {}, canjeado: {} }; }
+  }
+
+  function monthKey() {
+    var d = new Date();
+    return d.toLocaleString('es-CR', { year: 'numeric', month: '2-digit', timeZone: 'America/Costa_Rica' });
+  }
+  function monthLabel() {
+    var d = new Date();
+    return d.toLocaleString('es-CR', { month: 'long', year: 'numeric', timeZone: 'America/Costa_Rica' });
+  }
+
+  function money(n) {
+    if (n === null || n === undefined || isNaN(n)) return '—';
+    return '$' + n.toFixed(2).replace(/\.00$/, '');
+  }
+
+  function renderCourtesies() {
+    var cfg = readCourtesyConfig();
+    var sum = readCourtesySummary();
+
+    document.getElementById('courtesy-month').textContent = monthLabel();
+
+    var totalEntregado = 0, totalCanjeado = 0;
+    var anyLimitReached = false;
+
+    var container = document.getElementById('courtesy-cards');
+    container.innerHTML = '';
+
+    COURTESY_CATEGORIES.forEach(function(cat) {
+      var cost  = (cfg[cat.key] && typeof cfg[cat.key].cost  === 'number') ? cfg[cat.key].cost  : cat.defaultCost;
+      var limit = (cfg[cat.key] && typeof cfg[cat.key].limit === 'number') ? cfg[cat.key].limit : null;
+
+      var entregadoCount = sum.entregado[cat.key] || 0;
+      var canjeadoCount  = sum.canjeado[cat.key]  || 0;
+      var entregado$ = entregadoCount * cost;
+      var canjeado$  = canjeadoCount  * cost;
+
+      totalEntregado += entregado$;
+      totalCanjeado  += canjeado$;
+
+      var pct = (limit && limit > 0) ? Math.min((canjeado$ / limit) * 100, 100) : 0;
+      var limitReached = (limit && limit > 0) ? (canjeado$ >= limit) : false;
+      if (limitReached) anyLimitReached = true;
+
+      var statusText, statusColor, statusBg;
+      if (limit === null) {
+        statusText = 'SIN LIMITE'; statusColor = '#5a6776'; statusBg = 'rgba(255,255,255,0.05)';
+      } else if (limitReached) {
+        statusText = 'LIMITE ALCANZADO'; statusColor = '#e05c5c'; statusBg = 'rgba(224,92,92,0.12)';
+      } else {
+        statusText = 'ACTIVO'; statusColor = '#00AA6C'; statusBg = 'rgba(0,170,108,0.12)';
+      }
+
+      var card = document.createElement('div');
+      card.style.cssText = 'background:var(--dark-2);border:1px solid var(--border);border-left:3px solid ' + cat.color + ';border-radius:10px;padding:14px 14px 12px;';
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span style="font-size:18px;">' + cat.icon + '</span>' +
+            '<div>' +
+              '<div style="font-size:13px;font-weight:700;color:var(--cream);line-height:1.2;">' + cat.label + '</div>' +
+              '<div style="font-size:10px;color:var(--muted);font-weight:300;letter-spacing:0.05em;margin-top:1px;">' + cat.prefix + 'XXXXXX</div>' +
+            '</div>' +
+          '</div>' +
+          '<span style="font-size:9px;font-weight:700;letter-spacing:0.1em;padding:3px 8px;border-radius:10px;color:' + statusColor + ';background:' + statusBg + ';white-space:nowrap;">' + statusText + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">' +
+          '<div style="display:flex;gap:14px;align-items:baseline;">' +
+            '<div>' +
+              '<span style="font-family:Lato,monospace;font-size:15px;font-weight:700;color:var(--cream);">' + money(entregado$) + '</span>' +
+              '<span style="font-size:9px;color:var(--muted);margin-left:4px;letter-spacing:0.06em;text-transform:uppercase;">ent · ' + entregadoCount + '</span>' +
+            '</div>' +
+            '<div>' +
+              '<span style="font-family:Lato,monospace;font-size:15px;font-weight:700;color:' + cat.color + ';">' + money(canjeado$) + '</span>' +
+              '<span style="font-size:9px;color:var(--muted);margin-left:4px;letter-spacing:0.06em;text-transform:uppercase;">canj · ' + canjeadoCount + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--muted);font-weight:300;">' +
+            (limit === null ? 'sin limite' : ('limite ' + money(limit))) +
+          '</div>' +
+        '</div>' +
+        '<div style="width:100%;height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;">' +
+          '<div style="height:100%;background:' + (limitReached ? '#e05c5c' : cat.color) + ';border-radius:2px;width:' + pct + '%;transition:width 0.8s ease;"></div>' +
+        '</div>';
+      container.appendChild(card);
+    });
+
+    document.getElementById('ct-total-entregado').textContent = money(totalEntregado);
+    document.getElementById('ct-total-canjeado').textContent  = money(totalCanjeado);
+    var globalStatus = document.getElementById('courtesy-status-global');
+    if (anyLimitReached) {
+      globalStatus.textContent = '⚠ una o mas categorias al limite';
+      globalStatus.style.color = '#e05c5c';
+    } else {
+      globalStatus.textContent = '';
+    }
+  }
+
+  /* ── PANEL DE CONFIGURACION ──────────────────────────────── */
+  function buildConfigRows() {
+    var cfg = readCourtesyConfig();
+    var rowsHost = document.getElementById('config-rows');
+    rowsHost.innerHTML = '';
+
+    COURTESY_CATEGORIES.forEach(function(cat) {
+      var row = cfg[cat.key] || { cost: cat.defaultCost, limit: null };
+      var div = document.createElement('div');
+      div.style.cssText = 'border-left:3px solid ' + cat.color + ';padding:10px 12px;background:rgba(255,255,255,0.02);border-radius:8px;';
+      div.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
+          '<span style="font-size:16px;">' + cat.icon + '</span>' +
+          '<div>' +
+            '<div style="font-size:12px;font-weight:700;color:var(--cream);">' + cat.label + '</div>' +
+            '<div style="font-size:10px;color:var(--muted);font-weight:300;letter-spacing:0.05em;">' + cat.prefix + 'XXXXXX</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+          '<label style="display:flex;flex-direction:column;gap:4px;">' +
+            '<span style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">Costo unitario ($)</span>' +
+            '<input type="number" min="0" step="0.01" inputmode="decimal" id="cfg-cost-' + cat.key + '" value="' + (row.cost ?? cat.defaultCost) + '" placeholder="0" style="background:var(--dark);border:1px solid var(--border);color:var(--cream);padding:9px 10px;border-radius:6px;font-family:Lato,monospace;font-size:14px;font-weight:700;outline:none;" />' +
+          '</label>' +
+          '<label style="display:flex;flex-direction:column;gap:4px;">' +
+            '<span style="font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">Limite mensual ($)</span>' +
+            '<input type="number" min="0" step="1" inputmode="numeric" id="cfg-limit-' + cat.key + '" value="' + (row.limit === null || row.limit === undefined ? '' : row.limit) + '" placeholder="(vacio = sin limite)" style="background:var(--dark);border:1px solid var(--border);color:var(--cream);padding:9px 10px;border-radius:6px;font-family:Lato,monospace;font-size:14px;font-weight:700;outline:none;" />' +
+          '</label>' +
+        '</div>';
+      rowsHost.appendChild(div);
+    });
+  }
+
+  function toggleConfigPanel() {
+    var panel = document.getElementById('config-panel');
+    var arrow = document.getElementById('config-toggle-arrow');
+    var open = panel.style.display === 'none';
+    panel.style.display = open ? 'block' : 'none';
+    arrow.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+    if (open) buildConfigRows();
+  }
+
+  function saveCourtesyConfig() {
+    var newCfg = {};
+    var invalid = false;
+    COURTESY_CATEGORIES.forEach(function(cat) {
+      var costEl  = document.getElementById('cfg-cost-' + cat.key);
+      var limEl   = document.getElementById('cfg-limit-' + cat.key);
+      var cost    = parseFloat(costEl.value);
+      var limitRaw = limEl.value.trim();
+      var limit;
+      if (limitRaw === '') {
+        limit = null;
+      } else {
+        limit = parseFloat(limitRaw);
+        if (isNaN(limit) || limit < 0) { invalid = true; limEl.style.borderColor = '#e05c5c'; }
+        else { limEl.style.borderColor = ''; }
+      }
+      if (isNaN(cost) || cost < 0) { invalid = true; costEl.style.borderColor = '#e05c5c'; }
+      else { costEl.style.borderColor = ''; }
+      newCfg[cat.key] = { cost: isNaN(cost) ? cat.defaultCost : cost, limit: limit };
+    });
+    if (invalid) {
+      setConfigStatus('warn', '⚠ revisa los numeros marcados');
+      return;
+    }
+    localStorage.setItem(COURTESY_KEYS.config, JSON.stringify(newCfg));
+    setConfigStatus('saving', 'Guardando en el Sheet…');
+
+    // Sincronizar al Apps Script si esta configurado
+    if (SCRIPT_URL && SCRIPT_URL !== 'PEGAR_URL_AQUI') {
+      var qs = 'action=set_courtesy_config&config=' + encodeURIComponent(JSON.stringify(newCfg));
+      fetch(SCRIPT_URL + '?' + qs)
+        .then(function(r){ return r.json(); })
+        .then(function(){ setConfigStatus('ok', '✓ Guardado · ' + new Date().toLocaleTimeString('es-CR')); })
+        .catch(function(){ setConfigStatus('warn', '⚠ Guardado local pero no se pudo sincronizar al Sheet'); });
+    } else {
+      setConfigStatus('ok', '✓ Guardado localmente');
+    }
+
+    renderCourtesies();
+  }
+
+  function setConfigStatus(type, msg) {
+    var el = document.getElementById('config-status');
+    el.textContent = msg;
+    var colors = { ok: '#00AA6C', warn: '#f59e0b', saving: 'var(--muted)' };
+    el.style.color = colors[type] || 'var(--muted)';
+  }
+
+  /* ── RESEÑAS EVENTOS ──────────────────────────────────────── */
+  function renderEvento() {
+    var list = readReviewList(KEYS.evento);
+    var container = document.getElementById('evento-feed');
+    var empty     = document.getElementById('evento-empty');
+    var countLbl  = document.getElementById('evento-count-label');
+    var color     = '#8E5BA7';
+
+    document.getElementById('evento-total').textContent = list.length;
+    document.getElementById('evento-avg-evento').textContent   = fmtAvg(average(list, 'evento'));
+    document.getElementById('evento-avg-servicio').textContent = fmtAvg(average(list, 'servicio'));
+
+    container.querySelectorAll('.rv-card').forEach(function(el) { el.remove(); });
+
+    if (!list.length) {
+      empty.style.display = 'block';
+      countLbl.textContent = 'Sin entradas';
+      return;
+    }
+    empty.style.display = 'none';
+    countLbl.textContent = list.length + (list.length === 1 ? ' reseña' : ' reseñas');
+
+    list.slice(0, 20).forEach(function(item) {
+      var card = document.createElement('div');
+      card.className = 'rv-card';
+      card.style.cssText = 'background:var(--dark-2);border:1px solid var(--border);border-left:3px solid ' + color + ';border-radius:10px;padding:12px 14px;';
+      var cmt = item.comentario
+        ? '<p style="font-size:13px;color:var(--cream);font-weight:300;line-height:1.55;margin-top:8px;opacity:0.85;">' + escapeHtml(item.comentario) + '</p>'
+        : '<p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:6px;font-weight:300;">Sin comentario</p>';
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<div style="display:flex;gap:14px;align-items:center;">' +
+            '<div><span style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">Evento</span>' + starsHtml(item.evento, color) + '</div>' +
+            '<div><span style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">Servicio</span>' + starsHtml(item.servicio, color) + '</div>' +
+          '</div>' +
+          '<span style="font-size:10px;color:var(--muted);font-weight:300;">' + fmtTime(item.ts) + '</span>' +
+        '</div>' + cmt;
+      container.appendChild(card);
+    });
+  }
+
+  /* ── RESEÑAS · ATENCIÓN AL CLIENTE ──────────────────────────── */
+  function renderServicio() {
+    var list = readReviewList(KEYS.servicio);
+    var container = document.getElementById('servicio-feed');
+    var empty     = document.getElementById('servicio-empty');
+    var countLbl  = document.getElementById('servicio-count-label');
+    var color     = '#5B8DEF';
+
+    document.getElementById('servicio-total').textContent = list.length;
+    document.getElementById('servicio-avg-atencion').textContent   = fmtAvg(average(list, 'atencion'));
+    document.getElementById('servicio-avg-resolucion').textContent = fmtAvg(average(list, 'resolucion'));
+
+    container.querySelectorAll('.rv-card').forEach(function(el) { el.remove(); });
+
+    if (!list.length) {
+      empty.style.display = 'block';
+      countLbl.textContent = 'Sin entradas';
+      return;
+    }
+    empty.style.display = 'none';
+    countLbl.textContent = list.length + (list.length === 1 ? ' reseña' : ' reseñas');
+
+    list.slice(0, 20).forEach(function(item) {
+      var card = document.createElement('div');
+      card.className = 'rv-card';
+      card.style.cssText = 'background:var(--dark-2);border:1px solid var(--border);border-left:3px solid ' + color + ';border-radius:10px;padding:12px 14px;';
+      var cmt = item.comentario
+        ? '<p style="font-size:13px;color:var(--cream);font-weight:300;line-height:1.55;margin-top:8px;opacity:0.85;">' + escapeHtml(item.comentario) + '</p>'
+        : '<p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:6px;font-weight:300;">Sin comentario</p>';
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">' +
+          '<div style="display:flex;gap:14px;align-items:center;">' +
+            '<div><span style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">Atención</span>' + starsHtml(item.atencion, color) + '</div>' +
+            '<div><span style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-right:6px;">Resolución</span>' + starsHtml(item.resolucion, color) + '</div>' +
+          '</div>' +
+          '<span style="font-size:10px;color:var(--muted);font-weight:300;">' + fmtTime(item.ts) + '</span>' +
+        '</div>' + cmt;
+      container.appendChild(card);
+    });
+  }
+
+  function render() {
+    const v = get(KEYS.visits);
+    const g = get(KEYS.google);
+    const t = get(KEYS.ta);
+    const total = g + t;
+
+    // Stats
+    animNum(document.getElementById('s-visits'), v);
+    animNum(document.getElementById('s-google'), g);
+    animNum(document.getElementById('s-ta'), t);
+
+    const gPct = pct(g, v);
+    const tPct = pct(t, v);
+    animNum(document.getElementById('s-google-pct'), parseInt(gPct), '%');
+    animNum(document.getElementById('s-ta-pct'), parseInt(tPct), '%');
+
+    // Conversión
+    document.getElementById('c-google-pct').textContent = gPct;
+    document.getElementById('c-ta-pct').textContent = tPct;
+    const totPct = pct(total, v);
+    document.getElementById('c-total-pct').textContent = totPct;
+
+    animBar(document.getElementById('bar-google'), gPct);
+    animBar(document.getElementById('bar-ta'), tPct);
+    animBar(document.getElementById('bar-total'), totPct);
+
+    // Alerta de bajo rendimiento
+    const alert = document.getElementById('alert-low');
+    if (v > 10 && parseInt(totPct) < 20) {
+      alert.classList.add('visible');
+    } else {
+      alert.classList.remove('visible');
+    }
+
+    // Última actualización
+    const lu = localStorage.getItem(KEYS.lastUpdated);
+    document.getElementById('last-updated').textContent =
+      lu ? 'Última actualización: ' + new Date(lu).toLocaleString('es-CR') : 'Última actualización: —';
+  }
+
+  function markTested(platform) {
+    const now = new Date();
+    const timeStr = now.toLocaleString('es-CR', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'});
+    document.getElementById('last-tested').textContent = timeStr + ' · ' + platform.toUpperCase() + ' ✓';
+    const statusEl = document.getElementById('status-' + platform);
+    if (statusEl) { statusEl.textContent = '✅'; setTimeout(() => { statusEl.textContent = '🔗'; }, 4000); }
+    localStorage.setItem('anfi_last_tested_' + platform, now.toISOString());
+  }
+
+  // Restore last tested time on load
+  function restoreTestedTimes() {
+    const g = localStorage.getItem('anfi_last_tested_google');
+    const t = localStorage.getItem('anfi_last_tested_ta');
+    if (g || t) {
+      const latest = new Date(Math.max(g ? new Date(g) : 0, t ? new Date(t) : 0));
+      const which = (g && t) ? 'BOTH' : (g ? 'GOOGLE' : 'TA');
+      document.getElementById('last-tested').textContent =
+        latest.toLocaleString('es-CR', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) + ' · ' + which + ' ✓';
+    }
+  }
+  restoreTestedTimes();
+
+  function confirmReset() {
+    if (confirm('¿Reiniciar todos los contadores a cero?\n\nEsto borrará el feedback privado, las reseñas del restaurante, de eventos y de atención al cliente, y los datos del filtro de sentimiento (solo de este dispositivo). La configuracion de cortesias y los totales del mes NO se borran — se sincronizan desde el Sheet.')) {
+      [KEYS.visits, KEYS.google, KEYS.ta, KEYS.lastUpdated,
+       KEYS.gateYes, KEYS.gateNo, KEYS.feedback,
+       KEYS.restaurante, KEYS.evento, KEYS.servicio].forEach(k => localStorage.removeItem(k));
+      render();
+      renderSentiment();
+      renderFeedback();
+      renderRestaurant();
+      renderEvento();
+      renderServicio();
+    }
+  }
+
+  /* ── FETCH DESDE APPS SCRIPT ────────────────────────────────── */
+  function fetchFromSheet() {
+    if (!SCRIPT_URL || SCRIPT_URL === 'PEGAR_URL_AQUI') {
+      setSourceIndicator('local');
+      return;
+    }
+
+    setSourceIndicator('loading');
+
+    fetch(SCRIPT_URL + '?action=stats')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        // Sincronizar localStorage con los datos del sheet
+        localStorage.setItem(KEYS.gateYes,  data.gate_yes  || 0);
+        localStorage.setItem(KEYS.gateNo,   data.gate_no   || 0);
+        localStorage.setItem(KEYS.visits,   data.visits    || 0);
+        localStorage.setItem(KEYS.google,   data.google    || 0);
+        localStorage.setItem(KEYS.ta,       data.ta        || 0);
+        if (data.last_event) {
+          localStorage.setItem(KEYS.lastUpdated, data.last_event);
+        }
+        // Feedback privado
+        if (data.feedback && data.feedback.length >= 0) {
+          localStorage.setItem(KEYS.feedback, JSON.stringify(data.feedback));
+        }
+        // Reseñas de Restaurante (La Fontana)
+        if (data.restaurante && data.restaurante.length >= 0) {
+          localStorage.setItem(KEYS.restaurante, JSON.stringify(data.restaurante));
+        }
+        // Reseñas de Eventos Privados
+        if (data.evento && data.evento.length >= 0) {
+          localStorage.setItem(KEYS.evento, JSON.stringify(data.evento));
+        }
+        // Reseñas de Atención al Cliente
+        if (data.servicio && data.servicio.length >= 0) {
+          localStorage.setItem(KEYS.servicio, JSON.stringify(data.servicio));
+        }
+        // Cortesias: configuracion + resumen del mes
+        if (data.courtesy_config) {
+          localStorage.setItem(COURTESY_KEYS.config, JSON.stringify(data.courtesy_config));
+        }
+        if (data.courtesy_summary) {
+          var sumPayload = data.courtesy_summary;
+          if (!sumPayload.month) sumPayload.month = monthKey();
+          localStorage.setItem(COURTESY_KEYS.summary, JSON.stringify(sumPayload));
+        }
+
+        // Redibujar todo con los datos frescos
+        render();
+        renderSentiment();
+        renderFeedback();
+        renderRestaurant();
+        renderEvento();
+        renderServicio();
+        renderCourtesies();
+        setSourceIndicator('live');
+        markFetched(); // guardar hora del fetch para no volver a conectar en 6 horas
+      })
+      .catch(function() {
+        // Si falla el fetch, los datos de localStorage ya están dibujados
+        setSourceIndicator('local');
+      });
+  }
+
+  /* ── INDICADOR DE FUENTE DE DATOS ────────────────────────────── */
+  function setSourceIndicator(state) {
+    var badge = document.querySelector('.team-badge');
+    if (!badge) return;
+    if (state === 'live') {
+      badge.style.borderColor = 'rgba(0,170,108,0.5)';
+      badge.style.color = '#00AA6C';
+      badge.textContent = '● En Vivo · Google Sheets';
+    } else if (state === 'loading') {
+      badge.style.borderColor = 'rgba(201,168,76,0.3)';
+      badge.style.color = '#C9A84C';
+      badge.textContent = '● Sincronizando…';
+    } else {
+      badge.style.borderColor = 'rgba(255,255,255,0.15)';
+      badge.style.color = 'rgba(245,240,232,0.45)';
+      badge.textContent = '● Local · Sin conexión al Sheet';
+    }
+  }
+
+  // ── CONTROL DE FRECUENCIA DE FETCH ───────────────────────────────
+  // Solo busca datos del Sheet si pasaron mas de 6 horas desde la
+  // ultima vez. Asi solo conecta una vez en la manana y otra en la tarde.
+  var FETCH_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 horas
+
+  function shouldFetch() {
+    var last = localStorage.getItem('anfi_last_sheet_fetch');
+    if (!last) return true;
+    return (Date.now() - new Date(last).getTime()) > FETCH_INTERVAL_MS;
+  }
+
+  function markFetched() {
+    localStorage.setItem('anfi_last_sheet_fetch', new Date().toISOString());
+  }
+
+  // ── ARRANQUE ─────────────────────────────────────────────────────
+  // 1. Dibujar desde localStorage inmediatamente (rapido, sin red)
+  render();
+  renderSentiment();
+  renderFeedback();
+  renderRestaurant();
+  renderEvento();
+  renderServicio();
+  renderCourtesies();
+
+  // 2. Solo conectar al Sheet si el cache tiene mas de 6 horas
+  if (shouldFetch()) {
+    fetchFromSheet();
+  } else {
+    setSourceIndicator('live');
+  }
+
+  /* ── VALIDAR / CANJEAR CÓDIGO ─────────────────────────────────── */
+  function validateCode() {
+    const input  = document.getElementById('redeem-input');
+    const result = document.getElementById('redeem-result');
+    const code   = input.value.trim().toUpperCase();
+
+    if (!code) {
+      showRedeemResult('warn', '⚠️ Escribí el código antes de validar.');
+      return;
+    }
+    if (!SCRIPT_URL || SCRIPT_URL === 'PEGAR_URL_AQUI') {
+      showRedeemResult('warn', '⚠️ Configurá la URL del Apps Script primero.');
+      return;
+    }
+
+    showRedeemResult('loading', '⏳ Validando código…');
+
+    fetch(SCRIPT_URL + '?action=redeem_code&code=' + encodeURIComponent(code))
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          // Etiqueta clara del tipo de codigo segun la fuente o prefijo
+          var source = (data.source || '').toLowerCase();
+          var typeLabel, typeColor;
+          if (source === 'restaurante' || /^postre-/i.test(code)) {
+            typeLabel = '🍰 POSTRE DE CORTESIA · LA FONTANA';
+            typeColor = '#C8643C';
+          } else if (source === 'evento' || /^tour-/i.test(code)) {
+            typeLabel = '🎟️ TOUR DE CORTESIA · 1 PERSONA';
+            typeColor = '#8E5BA7';
+          } else {
+            typeLabel = '💰 15% DESCUENTO · TOUR LAS CAVERNAS';
+            typeColor = '#C9A84C';
+          }
+
+          showRedeemResult('ok',
+            '<div style="display:inline-block;background:rgba(255,255,255,0.05);border:1px solid ' + typeColor + ';color:' + typeColor + ';padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.08em;margin-bottom:10px;">' + typeLabel + '</div><br>' +
+            '✅ <strong>Codigo valido · Canjeado con exito</strong><br>' +
+            'Fuente: ' + (data.source || '—') + ' · Generado el ' + (data.date || '—') + '<br>' +
+            '<span style="font-size:11px;opacity:0.7;">El codigo quedo marcado como usado en el Sheet.</span>'
+          );
+          input.value = '';
+        } else if (data.status === 'already_used') {
+          showRedeemResult('warn',
+            '⚠️ <strong>Este código ya fue canjeado anteriormente.</strong><br>' +
+            'Fecha de uso: ' + (data.used_at || '—')
+          );
+        } else {
+          showRedeemResult('error',
+            '❌ <strong>Código no encontrado.</strong><br>' +
+            'Verificá que esté bien escrito (ej: ANFI15-AB2CDE).'
+          );
+        }
+      })
+      .catch(() => {
+        showRedeemResult('error', '❌ No se pudo conectar. Chequeá la conexión a internet.');
+      });
+  }
+
+  function showRedeemResult(type, html) {
+    const el = document.getElementById('redeem-result');
+    el.style.display = 'block';
+    el.innerHTML = html;
+    const styles = {
+      ok:      'background:rgba(0,170,108,0.12); border:1px solid rgba(0,170,108,0.3); color:rgba(245,240,232,0.9);',
+      warn:    'background:rgba(201,168,76,0.1);  border:1px solid rgba(201,168,76,0.3); color:rgba(245,240,232,0.9);',
+      error:   'background:rgba(200,60,60,0.1);   border:1px solid rgba(200,60,60,0.3);  color:rgba(245,240,232,0.9);',
+      loading: 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(245,240,232,0.6);'
+    };
+    el.style.cssText += styles[type] || styles.loading;
+  }
+
+  // Allow pressing Enter to validate
+  document.getElementById('redeem-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') validateCode();
+  });
+
+  /* ══ ANALITICA POR PERIODO ══════════════════════════════════════ */
+  var analyticsData  = null;
+  var currentPeriod  = 'today';
+  var trendChart     = null;
+
+  function fetchAnalytics() {
+    if (!SCRIPT_URL || SCRIPT_URL === 'PEGAR_URL_AQUI') return;
+    fetch(SCRIPT_URL + '?action=analytics')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        analyticsData = data;
+        renderAnalyticsPeriod(currentPeriod);
+        renderTrendChart(data.daily || []);
+      })
+      .catch(function() {
+        document.getElementById('chart-loading').textContent = 'No se pudo cargar la tendencia.';
+      });
+  }
+
+  function switchPeriod(p) {
+    currentPeriod = p;
+    document.querySelectorAll('.period-tab').forEach(function(btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-period') === p);
+    });
+    if (analyticsData) renderAnalyticsPeriod(p);
+  }
+
+  function renderAnalyticsPeriod(period) {
+    var d = analyticsData && analyticsData[period];
+    if (!d) return;
+
+    var totalGate  = (d.gate_yes || 0) + (d.gate_no || 0);
+    var posPct     = totalGate ? Math.round((d.gate_yes / totalGate) * 100) + '%' : '—';
+    var totalClicks = (d.google || 0) + (d.ta || 0);
+    var gPct       = d.visits ? Math.round(((d.google || 0) / d.visits) * 100) : 0;
+    var tPct       = d.visits ? Math.round(((d.ta    || 0) / d.visits) * 100) : 0;
+    var totPct     = d.visits ? Math.round((totalClicks    / d.visits) * 100) : 0;
+
+    document.getElementById('p-visits').textContent   = d.visits || 0;
+    document.getElementById('p-positive').textContent = posPct;
+    document.getElementById('p-clicks').textContent   = totalClicks;
+
+    document.getElementById('p-google-pct').textContent = gPct + '%';
+    document.getElementById('p-ta-pct').textContent     = tPct + '%';
+    document.getElementById('p-total-pct').textContent  = totPct + '%';
+
+    animBar(document.getElementById('p-bar-google'), gPct + '%');
+    animBar(document.getElementById('p-bar-ta'),     tPct + '%');
+    animBar(document.getElementById('p-bar-total'),  totPct + '%');
+  }
+
+  function renderTrendChart(daily) {
+    var loading = document.getElementById('chart-loading');
+    var canvas  = document.getElementById('trend-chart');
+
+    if (!daily || daily.length === 0) {
+      loading.textContent = 'Sin datos suficientes aún.';
+      return;
+    }
+
+    loading.style.display = 'none';
+    canvas.style.display  = 'block';
+
+    var labels  = daily.map(function(d) { return d.label; });
+    var visits  = daily.map(function(d) { return d.visits   || 0; });
+    var yes     = daily.map(function(d) { return d.gate_yes || 0; });
+    var clicks  = daily.map(function(d) { return (d.google || 0) + (d.ta || 0); });
+
+    if (trendChart) { trendChart.destroy(); }
+
+    var ctx = canvas.getContext('2d');
+    trendChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Visitas',
+            data: visits,
+            backgroundColor: 'rgba(201,168,76,0.30)',
+            borderColor:     'rgba(201,168,76,0.75)',
+            borderWidth: 1,
+            borderRadius: 3,
+            order: 3
+          },
+          {
+            label: '% Positivos',
+            data: yes,
+            backgroundColor: 'rgba(245,240,232,0.15)',
+            borderColor:     'rgba(245,240,232,0.4)',
+            borderWidth: 1,
+            borderRadius: 3,
+            order: 2
+          },
+          {
+            label: 'Clics reseñas',
+            data: clicks,
+            backgroundColor: 'rgba(0,170,108,0.35)',
+            borderColor:     'rgba(0,170,108,0.8)',
+            borderWidth: 1,
+            borderRadius: 3,
+            order: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            labels: {
+              color: 'rgba(245,240,232,0.55)',
+              font: { family: 'Lato', size: 10 },
+              boxWidth: 10,
+              padding: 12
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(14,14,14,0.92)',
+            borderColor: 'rgba(201,168,76,0.25)',
+            borderWidth: 1,
+            titleColor: 'rgba(201,168,76,0.9)',
+            bodyColor: 'rgba(245,240,232,0.75)',
+            padding: 10,
+            titleFont: { family: 'Lato', size: 11, weight: 'bold' },
+            bodyFont: { family: 'Lato', size: 11 }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: 'rgba(245,240,232,0.4)',
+              font: { size: 9, family: 'Lato' },
+              maxRotation: 45
+            },
+            grid: { color: 'rgba(255,255,255,0.04)' }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: 'rgba(245,240,232,0.4)',
+              font: { size: 9, family: 'Lato' },
+              stepSize: 1
+            },
+            grid: { color: 'rgba(255,255,255,0.04)' }
+          }
+        }
+      }
+    });
+  }
+
+  // Analytics: solo conecta si el cache tiene mas de 6 horas (mismo criterio que stats)
+  if (shouldFetch()) {
+    fetchAnalytics();
+  }
+</script>
+</body>
+</html>
