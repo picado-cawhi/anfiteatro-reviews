@@ -628,9 +628,9 @@
       <div style="font-size:12px;color:var(--muted);font-weight:300;margin-bottom:14px;line-height:1.5;">
         Cuando el cliente presenta su código, escribílo acá para validarlo y marcarlo como usado.<br>
         <span style="font-size:11px;opacity:0.75;">
-          <span style="color:#C9A84C;">●</span> ANFI15-… 15% tour ·
+          <span style="color:#C9A84C;">●</span> ANFI15-… 10% tour ·
           <span style="color:#C8643C;">●</span> POSTRE-… postre Fontana ·
-          <span style="color:#8E5BA7;">●</span> TOUR-… tour cortesia
+          <span style="color:#8E5BA7;">●</span> TOUR-… tour cortesía
         </span>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:10px;">
@@ -689,7 +689,7 @@
     <div id="resto-feed" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
       <div id="resto-empty" style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;">
         Aún no hay reseñas del restaurante.<br>
-        <span style="opacity:0.55;">Apareceran aqui cuando se envien desde /restaurante.</span>
+        <span style="opacity:0.55;">Aparecerán aquí cuando se envíen desde /restaurante.</span>
       </div>
     </div>
   </div>
@@ -717,7 +717,7 @@
     <div id="evento-feed" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
       <div id="evento-empty" style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;">
         Aún no hay reseñas de eventos privados.<br>
-        <span style="opacity:0.55;">Bodas, cumpleanos, team buildings y citas apareceran aqui.</span>
+        <span style="opacity:0.55;">Bodas, cumpleaños, team buildings y citas aparecerán aquí.</span>
       </div>
     </div>
   </div>
@@ -745,7 +745,7 @@
     <div id="servicio-feed" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
       <div id="servicio-empty" style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;">
         Aún no hay reseñas de atención al cliente.<br>
-        <span style="opacity:0.55;">Apareceran aqui cuando se envien desde /servicio.</span>
+        <span style="opacity:0.55;">Aparecerán aquí cuando se envíen desde /servicio.</span>
       </div>
     </div>
   </div>
@@ -1007,9 +1007,9 @@
 
   // Definicion de las 3 categorias (mismo orden en UI)
   var COURTESY_CATEGORIES = [
-    { key: 'anfi15', label: 'Tour Las Cavernas (15%)',  prefix: 'ANFI15-', sourceMatches: ['google', 'ta', 'feedback'], color: '#C9A84C', icon: '💰', defaultCost: 6 },
+    { key: 'anfi15', label: 'Tour Las Cavernas (10%)',  prefix: 'ANFI15-', sourceMatches: ['google', 'ta', 'feedback'], color: '#C9A84C', icon: '💰', defaultCost: 6 },
     { key: 'postre', label: 'Postre Fontana',           prefix: 'POSTRE-', sourceMatches: ['restaurante'],              color: '#C8643C', icon: '🍰', defaultCost: 3 },
-    { key: 'tour',   label: 'Tour Cortesia (1 persona)', prefix: 'TOUR-',  sourceMatches: ['evento'],                   color: '#8E5BA7', icon: '🎟️', defaultCost: 15 }
+    { key: 'tour',   label: 'Tour Cortesía (1 persona)', prefix: 'TOUR-',  sourceMatches: ['evento'],                   color: '#8E5BA7', icon: '🎟️', defaultCost: 15 }
   ];
 
   var COURTESY_KEYS = {
@@ -1534,19 +1534,19 @@
           var source = (data.source || '').toLowerCase();
           var typeLabel, typeColor;
           if (source === 'restaurante' || /^postre-/i.test(code)) {
-            typeLabel = '🍰 POSTRE DE CORTESIA · LA FONTANA';
+            typeLabel = '🍰 POSTRE DE CORTESÍA · LA FONTANA';
             typeColor = '#C8643C';
           } else if (source === 'evento' || /^tour-/i.test(code)) {
-            typeLabel = '🎟️ TOUR DE CORTESIA · 1 PERSONA';
+            typeLabel = '🎟️ TOUR DE CORTESÍA · 1 PERSONA';
             typeColor = '#8E5BA7';
           } else {
-            typeLabel = '💰 15% DESCUENTO · TOUR LAS CAVERNAS';
+            typeLabel = '💰 10% DESCUENTO · TOUR LAS CAVERNAS';
             typeColor = '#C9A84C';
           }
 
           showRedeemResult('ok',
             '<div style="display:inline-block;background:rgba(255,255,255,0.05);border:1px solid ' + typeColor + ';color:' + typeColor + ';padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.08em;margin-bottom:10px;">' + typeLabel + '</div><br>' +
-            '✅ <strong>Codigo valido · Canjeado con exito</strong><br>' +
+            '✅ <strong>Código válido · Canjeado con éxito</strong><br>' +
             'Fuente: ' + (data.source || '—') + ' · Generado el ' + (data.date || '—') + '<br>' +
             '<span style="font-size:11px;opacity:0.7;">El codigo quedo marcado como usado en el Sheet.</span>'
           );

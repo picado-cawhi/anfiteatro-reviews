@@ -111,10 +111,11 @@
       margin-top: 2px;
     }
     .brand-loc {
-      font-size: 11px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 13px;
       color: var(--muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.02em;
       margin-top: 6px;
     }
 
@@ -460,17 +461,11 @@
 ══════════════════════════════════════ -->
 <div class="screen" id="screen-form">
 
-  <div class="ornament">
-    <div class="line"></div>
-    <span>Restaurantes del Anfiteatro</span>
-    <div class="line"></div>
-  </div>
-
   <div class="brand">
     <div class="brand-icon" aria-hidden="true"></div>
-    <div class="brand-name">Anfiteatro de Villa</div>
-    <div class="brand-sub">Restaurantes</div>
-    <div class="brand-loc">Ciudad Colon · Costa Rica</div>
+    <div class="brand-name">Reseña de Restaurante</div>
+    <div class="brand-sub">Anfiteatro de Villa</div>
+    <div class="brand-loc">Ciudad Colón · Costa Rica</div>
   </div>
 
   <div class="divider"></div>
@@ -509,7 +504,7 @@
     <textarea
       class="feedback-textarea"
       id="comentario"
-      placeholder="Contanos algo mas: un plato favorito, una sugerencia, lo que se podria mejorar… / Tell us more"
+      placeholder="Contanos algo más: un plato favorito, una sugerencia, lo que se podría mejorar… / Tell us more"
       maxlength="400"
       oninput="updateCounter()"
     ></textarea>
@@ -517,7 +512,7 @@
   </div>
 
   <p class="closing-note">
-    Tu opinion nos ayuda a mejorar cada plato y cada detalle.
+    Tu opinión nos ayuda a mejorar cada plato y cada detalle.
   </p>
 
   <button class="btn-submit" id="btn-submit" onclick="submitForm()" disabled>
@@ -537,11 +532,11 @@
   <h2 class="thanks-title">Gracias por tu reseña</h2>
   <p class="thanks-body" id="thanks-body-text">
     <span id="thanks-with-code">
-      Y como agradecimiento, te invitamos un postre de cortesia en tu proxima visita.
+      Y como agradecimiento, te invitamos un postre de cortesía en tu próxima visita.
       <span class="en">Thank you · Enjoy a complimentary dessert on your next visit.</span>
     </span>
     <span id="thanks-no-code" style="display:none;">
-      Cada estrella y cada comentario llega directo al equipo. Significa muchisimo para nosotros.
+      Cada estrella y cada comentario llega directo al equipo. Significa muchísimo para nosotros.
       <span class="en">Each star and comment goes directly to the team. Thank you.</span>
     </span>
   </p>
@@ -555,7 +550,7 @@
   </div>
 
   <div class="code-wrap" id="code-wrap" style="display:none;">
-    <div class="code-label" style="text-align:center;">🍰 Tu postre de cortesia</div>
+    <div class="code-label" style="text-align:center;">🍰 Tu postre de cortesía</div>
     <div class="code-box" onclick="copyCode()">
       <span class="code-text" id="code-text">—</span>
       <span class="code-copy-icon">📋</span>

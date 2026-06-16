@@ -111,10 +111,11 @@
       margin-top: 2px;
     }
     .brand-loc {
-      font-size: 11px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 13px;
       color: var(--muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.02em;
       margin-top: 6px;
     }
 
@@ -440,17 +441,11 @@
 ══════════════════════════════════════ -->
 <div class="screen" id="screen-form">
 
-  <div class="ornament">
-    <div class="line"></div>
-    <span>Eventos Privados</span>
-    <div class="line"></div>
-  </div>
-
   <div class="brand">
     <div class="brand-icon" aria-hidden="true"></div>
-    <div class="brand-name">Anfiteatro de Villa</div>
-    <div class="brand-sub">Eventos Privados</div>
-    <div class="brand-loc">Ciudad Colon · Costa Rica</div>
+    <div class="brand-name">Reseña de Evento</div>
+    <div class="brand-sub">Anfiteatro de Villa</div>
+    <div class="brand-loc">Ciudad Colón · Costa Rica</div>
   </div>
 
   <div class="divider"></div>
@@ -482,7 +477,7 @@
   </div>
 
   <p class="closing-note">
-    Tu opinion nos ayuda a seguir creando experiencias inolvidables.
+    Tu opinión nos ayuda a seguir creando experiencias inolvidables.
   </p>
 
   <!-- Pregunta 3: Comentarios -->
@@ -490,7 +485,7 @@
     <textarea
       class="feedback-textarea"
       id="comentario"
-      placeholder="Contanos lo mejor del evento y lo que podriamos mejorar… / Share what you loved and what could be better"
+      placeholder="Contanos lo mejor del evento y lo que podríamos mejorar… / Share what you loved and what could be better"
       maxlength="600"
       oninput="updateCounter()"
     ></textarea>
@@ -514,11 +509,11 @@
   <h2 class="thanks-title">Gracias por tu reseña</h2>
   <p class="thanks-body">
     <span id="thanks-with-code">
-      Y como agradecimiento, te regalamos un tour de cortesia para una persona en Las Cavernas del Canon.
+      Y como agradecimiento, te regalamos un tour de cortesía para una persona en Las Cavernas del Cañón.
       <span class="en">Thank you · Enjoy a complimentary cavern tour for one person.</span>
     </span>
     <span id="thanks-no-code" style="display:none;">
-      Cada estrella y cada comentario llega directo al equipo. Significa muchisimo para nosotros.
+      Cada estrella y cada comentario llega directo al equipo. Significa muchísimo para nosotros.
       <span class="en">Each star and comment goes directly to the team. Thank you.</span>
     </span>
   </p>
@@ -532,14 +527,14 @@
   </div>
 
   <div class="code-wrap" id="code-wrap" style="display:none;">
-    <div class="code-label">Tour de cortesia · 1 persona</div>
+    <div class="code-label">Tour de cortesía · 1 persona</div>
     <div class="code-box" onclick="copyCode()">
       <span class="code-text" id="code-text">—</span>
       <span class="code-copy-icon">Copiar</span>
     </div>
     <div class="code-hint" id="code-hint">✓ Copiado</div>
     <div class="code-note">
-      Presenta este codigo para canjear un <strong>tour de cortesia para 1 persona</strong> en Las Cavernas del Canon.<br>
+      Presenta este código para canjear un <strong>tour de cortesía para 1 persona</strong> en Las Cavernas del Cañón.<br>
       <span style="font-size:11px;opacity:0.7;">Show this code to claim a complimentary cavern tour for one person.</span>
     </div>
   </div>
