@@ -94,6 +94,7 @@
       margin-bottom: 4px;
       filter: drop-shadow(0 2px 12px rgba(200,100,60,0.35));
     }
+    .brand-icon:empty { display: none; }
     .brand-name {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
@@ -238,6 +239,27 @@
       color: var(--muted);
       margin-bottom: 6px;
       text-align: left;
+    }
+    .server-line {
+      width: 100%;
+      margin: -2px 0 14px;
+      color: var(--copper);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      display: none;
+    }
+    .closing-note {
+      color: var(--cream);
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.55;
+      text-align: center;
+      margin: 0 4px 16px;
+      opacity: 0;
+      animation: up 0.5s ease 0.58s forwards;
     }
     .feedback-textarea {
       width: 100%;
@@ -439,33 +461,23 @@
 
   <div class="ornament">
     <div class="line"></div>
-    <span>La Fontana del Anfiteatro</span>
+    <span>Restaurantes del Anfiteatro</span>
     <div class="line"></div>
   </div>
 
   <div class="brand">
-    <div class="brand-icon" aria-hidden="true">🍷</div>
+    <div class="brand-icon" aria-hidden="true"></div>
     <div class="brand-name">Anfiteatro de Villa</div>
-    <div class="brand-sub">Restaurante</div>
+    <div class="brand-sub">Restaurantes</div>
     <div class="brand-loc">Ciudad Colon · Costa Rica</div>
   </div>
 
   <div class="divider"></div>
 
-  <div class="headline">
-    <h1>¿Como estuvo tu visita?</h1>
-    <p>How was your dining experience?</p>
-  </div>
-
-  <p class="subline">
-    Tu opinion nos ayuda a mejorar cada plato y cada detalle.
-  </p>
-
   <!-- Pregunta 1: Servicio -->
   <div class="q-card q1">
-    <div class="q-label">Pregunta 1 / 2</div>
-    <div class="q-text">¿Que le parecio el servicio?</div>
-    <div class="q-text-en">How was the service?</div>
+    <div class="q-text">Califica nuestro servicio</div>
+    <div class="q-text-en">Rate our service</div>
     <div class="stars-input" id="stars-servicio">
       <button class="star-btn" onclick="setStar('servicio',1)" aria-label="1 estrella">★</button>
       <button class="star-btn" onclick="setStar('servicio',2)" aria-label="2 estrellas">★</button>
@@ -473,14 +485,12 @@
       <button class="star-btn" onclick="setStar('servicio',4)" aria-label="4 estrellas">★</button>
       <button class="star-btn" onclick="setStar('servicio',5)" aria-label="5 estrellas">★</button>
     </div>
-    <div class="stars-hint" id="hint-servicio">Toca una estrella</div>
   </div>
 
   <!-- Pregunta 2: Comida -->
   <div class="q-card q2">
-    <div class="q-label">Pregunta 2 / 2</div>
-    <div class="q-text">¿Que le parecio la calidad de la comida?</div>
-    <div class="q-text-en">How was the quality of the food?</div>
+    <div class="q-text">Califica la calidad de la comida</div>
+    <div class="q-text-en">Rate the quality of the food</div>
     <div class="stars-input" id="stars-comida">
       <button class="star-btn" onclick="setStar('comida',1)" aria-label="1 estrella">★</button>
       <button class="star-btn" onclick="setStar('comida',2)" aria-label="2 estrellas">★</button>
@@ -488,8 +498,9 @@
       <button class="star-btn" onclick="setStar('comida',4)" aria-label="4 estrellas">★</button>
       <button class="star-btn" onclick="setStar('comida',5)" aria-label="5 estrellas">★</button>
     </div>
-    <div class="stars-hint" id="hint-comida">Toca una estrella</div>
   </div>
+
+  <div class="server-line" id="server-line"></div>
 
   <!-- Comentario opcional -->
   <div class="comment-block">
@@ -503,6 +514,10 @@
     ></textarea>
     <div class="char-counter"><span id="char-count">0</span> / 400</div>
   </div>
+
+  <p class="closing-note">
+    Tu opinion nos ayuda a mejorar cada plato y cada detalle.
+  </p>
 
   <button class="btn-submit" id="btn-submit" onclick="submitForm()" disabled>
     Enviar reseña
@@ -560,6 +575,9 @@
   // ──────────────────────────────────────────────────────────────
 
   var ratings = { servicio: 0, comida: 0 };
+  var salonero = new URLSearchParams(window.location.search).get('salonero')
+    || new URLSearchParams(window.location.search).get('server')
+    || '';
 
   function setStar(group, n) {
     ratings[group] = n;
@@ -567,10 +585,6 @@
     btns.forEach(function(b, i) {
       b.classList.toggle('active', i < n);
     });
-    var hint = document.getElementById('hint-' + group);
-    var labels = ['', 'Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'];
-    hint.textContent = labels[n] || 'Toca una estrella';
-    hint.classList.toggle('active', n > 0);
     refreshSubmit();
   }
 
@@ -636,6 +650,7 @@
     feed.unshift({
       servicio: ratings.servicio,
       comida: ratings.comida,
+      salonero: salonero,
       comentario: comentario,
       ts: new Date().toISOString()
     });
@@ -646,6 +661,7 @@
     ping('restaurant_review', {
       servicio: ratings.servicio,
       comida: ratings.comida,
+      salonero: salonero,
       comentario: comentario
     });
 
@@ -679,6 +695,10 @@
   }
 
   // Registrar visita
+  if (salonero) {
+    document.getElementById('server-line').textContent = 'Salonero: ' + salonero;
+    document.getElementById('server-line').style.display = 'block';
+  }
   ping('event', { type: 'visit', surface: 'restaurante' });
 </script>
 

@@ -94,6 +94,7 @@
       margin-bottom: 4px;
       filter: drop-shadow(0 2px 12px rgba(91,141,239,0.4));
     }
+    .brand-icon:empty { display: none; }
     .brand-name {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
@@ -223,6 +224,42 @@
       min-height: 14px;
     }
     .stars-hint.active { color: var(--gold); }
+
+    .choice-input {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+    .choice-btn {
+      min-height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--dark);
+      color: var(--cream);
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .choice-btn.active {
+      background: rgba(91,141,239,0.16);
+      border-color: rgba(91,141,239,0.65);
+      color: var(--cream);
+    }
+
+    .closing-note {
+      color: var(--cream);
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.5;
+      margin: 2px 0 16px;
+      max-width: 320px;
+    }
 
     /* ── COMMENT (opcional) ── */
     .feedback-textarea {
@@ -370,12 +407,12 @@
 
   <div class="ornament">
     <div class="line"></div>
-    <span>Atención al Cliente · Anfiteatro</span>
+    <span>Atención al Cliente</span>
     <div class="line"></div>
   </div>
 
   <div class="brand">
-    <div class="brand-icon" aria-hidden="true">💬</div>
+    <div class="brand-icon" aria-hidden="true"></div>
     <div class="brand-name">Anfiteatro de Villa</div>
     <div class="brand-sub">Atención al Cliente</div>
     <div class="brand-loc">Ciudad Colón · Costa Rica</div>
@@ -383,20 +420,10 @@
 
   <div class="divider"></div>
 
-  <div class="headline">
-    <h1>¿Cómo fue tu atención?</h1>
-    <p>How was the service you received?</p>
-  </div>
-
-  <p class="subline">
-    Tu opinión nos ayuda a mejorar cada interacción por correo, WhatsApp o cualquier canal.
-  </p>
-
   <!-- Pregunta 1 -->
   <div class="q-card q1">
-    <div class="q-label">Pregunta 1 / 2</div>
-    <div class="q-text">¿Qué tan satisfecho quedaste con la atención recibida?</div>
-    <div class="q-text-en">How satisfied are you with the service received?</div>
+    <div class="q-text">Califica la atención recibida</div>
+    <div class="q-text-en">Rate the service received</div>
     <div class="stars-input" id="stars-atencion">
       <button class="star-btn" onclick="setStar('atencion',1)" aria-label="1 estrella">★</button>
       <button class="star-btn" onclick="setStar('atencion',2)" aria-label="2 estrellas">★</button>
@@ -404,38 +431,22 @@
       <button class="star-btn" onclick="setStar('atencion',4)" aria-label="4 estrellas">★</button>
       <button class="star-btn" onclick="setStar('atencion',5)" aria-label="5 estrellas">★</button>
     </div>
-    <div class="stars-hint" id="hint-atencion">Toca una estrella</div>
   </div>
 
   <!-- Pregunta 2 -->
   <div class="q-card q2">
-    <div class="q-label">Pregunta 2 / 2</div>
     <div class="q-text">¿Resolvimos tu consulta?</div>
     <div class="q-text-en">Did we resolve your inquiry?</div>
-    <div class="stars-input" id="stars-resolucion">
-      <button class="star-btn" onclick="setStar('resolucion',1)" aria-label="1 estrella">★</button>
-      <button class="star-btn" onclick="setStar('resolucion',2)" aria-label="2 estrellas">★</button>
-      <button class="star-btn" onclick="setStar('resolucion',3)" aria-label="3 estrellas">★</button>
-      <button class="star-btn" onclick="setStar('resolucion',4)" aria-label="4 estrellas">★</button>
-      <button class="star-btn" onclick="setStar('resolucion',5)" aria-label="5 estrellas">★</button>
+    <div class="choice-input">
+      <button class="choice-btn" id="choice-si" onclick="setResolution('si')" type="button">Sí</button>
+      <button class="choice-btn" id="choice-no" onclick="setResolution('no')" type="button">No</button>
     </div>
-    <div class="stars-hint" id="hint-resolucion">Toca una estrella</div>
   </div>
 
-  <!-- Comentario opcional -->
-  <div class="q-card q3">
-    <div class="q-label">Comentario (opcional)</div>
-    <div class="q-text">¿Algo más que querás contarnos?</div>
-    <div class="q-text-en">Anything else you'd like to share?</div>
-    <textarea
-      class="feedback-textarea"
-      id="comentario"
-      placeholder="Contanos cómo podemos atenderte mejor… / Tell us how we can serve you better"
-      maxlength="500"
-      oninput="updateCounter()"
-    ></textarea>
-    <div class="char-counter"><span id="char-count">0</span> / 500</div>
-  </div>
+  <p class="closing-note">
+    Tu opinión nos ayuda a mejorar. Gracias!!
+    <span style="display:block;font-size:11px;color:rgba(245,240,232,0.5);margin-top:4px;">Your feedback helps us improve. Thank you.</span>
+  </p>
 
   <button class="btn-submit" id="btn-submit" onclick="submitForm()" disabled>
     Enviar
@@ -473,7 +484,7 @@
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzX_CJ18adp-bHzhXJfFrXr9MIG5WtYVsNSknn_dDUJnkz8WGOoriN7LuEDKUoLbeEQJg/exec';
   // ──────────────────────────────────────────────────────────────
 
-  var ratings = { atencion: 0, resolucion: 0 };
+  var ratings = { atencion: 0, resolucion: '' };
 
   function setStar(group, n) {
     ratings[group] = n;
@@ -481,21 +492,19 @@
     btns.forEach(function(b, i) {
       b.classList.toggle('active', i < n);
     });
-    var hint = document.getElementById('hint-' + group);
-    var labels = ['', 'Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'];
-    hint.textContent = labels[n] || 'Toca una estrella';
-    hint.classList.toggle('active', n > 0);
     refreshSubmit();
   }
 
-  function updateCounter() {
-    var t = document.getElementById('comentario');
-    document.getElementById('char-count').textContent = t.value.length;
+  function setResolution(value) {
+    ratings.resolucion = value;
+    document.getElementById('choice-si').classList.toggle('active', value === 'si');
+    document.getElementById('choice-no').classList.toggle('active', value === 'no');
+    refreshSubmit();
   }
 
   function refreshSubmit() {
     var btn = document.getElementById('btn-submit');
-    btn.disabled = !(ratings.atencion > 0 && ratings.resolucion > 0);
+    btn.disabled = !(ratings.atencion > 0 && ratings.resolucion);
   }
 
   function ping(action, params) {
@@ -507,9 +516,9 @@
   }
 
   function submitForm() {
-    if (ratings.atencion === 0 || ratings.resolucion === 0) return;
+    if (ratings.atencion === 0 || !ratings.resolucion) return;
 
-    var comentario = document.getElementById('comentario').value.trim();
+    var comentario = '';
 
     // localStorage backup local
     var feed = JSON.parse(localStorage.getItem('anfi_servicio') || '[]');

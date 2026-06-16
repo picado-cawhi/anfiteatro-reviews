@@ -408,21 +408,17 @@
   </div>
 
   <div class="brand">
-    <div class="brand-name">Anfiteatro de Villa</div>
-    <div class="brand-loc">Ciudad Colón, Costa Rica</div>
+    <div class="brand-name">Las Cavernas del Cañón</div>
+    <div class="brand-loc">by Anfiteatro de Villa</div>
+    <p style="font-family:'Lato',sans-serif;font-size:11px;color:rgba(245,240,232,0.5);letter-spacing:0.08em;text-transform:uppercase;margin-top:8px;">Ciudad Colón, Costa Rica</p>
   </div>
 
   <div class="divider"></div>
 
   <div class="headline">
-    <h1>¿Cómo estuvo tu experiencia?</h1>
-    <p class="es">How was your experience?</p>
+    <h1>Compartí tu experiencia.</h1>
+    <p class="es">Share your experience.</p>
   </div>
-
-  <p class="subline">
-    Tu reseña nos ayuda a crecer. Gracias. 🙏
-    <span class="es">Your review helps us grow and lets others discover this place.</span>
-  </p>
 
   <div class="buttons">
 
@@ -481,6 +477,11 @@
 
   </div>
 
+  <p class="subline">
+    Tu reseña nos ayuda a crecer. Gracias!!
+    <span class="es">Your review helps us grow and lets others discover this place.</span>
+  </p>
+
   <div class="stars">
     <span class="star">★</span>
     <span class="star">★</span>
@@ -494,8 +495,8 @@
 <!-- ── CODE MODAL ── -->
 <div class="code-overlay" id="code-overlay">
   <div class="code-modal">
-    <div class="code-title">🎉 ¡Gracias!</div>
-    <p class="code-sub" style="color:var(--cream);font-weight:400;">Aquí tenés tu código de 15% de descuento<br><span style="font-size:11px;color:rgba(245,240,232,0.5);">Here's your 15% discount code</span></p>
+    <div class="code-title">¡Gracias!</div>
+    <p class="code-sub" style="color:var(--cream);font-weight:400;">Aquí tenés tu código de 10% de descuento<br><span style="font-size:11px;color:rgba(245,240,232,0.5);">Here's your 10% discount code</span></p>
     <div class="code-box" onclick="copyCode()">
       <span class="code-text" id="modal-code">—</span>
       <button class="code-copy-btn" onclick="copyCode()" aria-label="Copy code">📋</button>
@@ -540,7 +541,7 @@
 
   function generateCode() {
     var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    var code  = 'ANFI15-';
+    var code  = 'ANFI10-';
     for (var i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
     return code;
   }
