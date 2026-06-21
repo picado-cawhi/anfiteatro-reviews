@@ -1500,11 +1500,15 @@
     });
   }
 
-  function renderCavernasQR() {
+  function renderCavernasQR(_retry) {
     var urlEl = document.getElementById('cavernas-qr-url');
     if (urlEl) urlEl.textContent = BASE_CAVE_URL;
     var canvas = document.getElementById('cavernas-qr-canvas');
-    if (!canvas || typeof QRCode === 'undefined') return;
+    if (!canvas) return;
+    if (typeof QRCode === 'undefined') {
+      if ((_retry || 0) < 10) setTimeout(function(){ renderCavernasQR((_retry||0)+1); }, 300);
+      return;
+    }
     QRCode.toCanvas(canvas, BASE_CAVE_URL, {
       width: 160, margin: 1,
       color: { dark: '#0e0e0e', light: '#f5f0e8' },
@@ -1512,13 +1516,17 @@
     }, function(err){ if (err) console.error('QR Cavernas:', err); });
   }
 
-  function renderMeseroQRGrid() {
+  function renderMeseroQRGrid(_retry) {
     var container = document.getElementById('mesero-qr-grid');
     if (!container) return;
-    container.innerHTML = '';
     var list = readMeseros().filter(function(m){ return m.activo !== false; });
+    container.innerHTML = '';
     if (!list.length) {
       container.innerHTML = '<p style="font-size:11px;color:var(--muted);grid-column:1/-1;padding:4px 0;margin:0;">Sin meseros activos — agregalos abajo.</p>';
+      return;
+    }
+    if (typeof QRCode === 'undefined') {
+      if ((_retry || 0) < 10) setTimeout(function(){ renderMeseroQRGrid((_retry||0)+1); }, 300);
       return;
     }
     list.forEach(function(m) {
@@ -1537,13 +1545,11 @@
       div.appendChild(wrap);
       div.appendChild(nameEl);
       container.appendChild(div);
-      if (typeof QRCode !== 'undefined') {
-        QRCode.toDataURL(url, {
-          width: 84, margin: 1,
-          color: { dark: '#0e0e0e', light: '#f5f0e8' },
-          errorCorrectionLevel: 'H'
-        }, function(err, dataUrl){ if (!err) img.src = dataUrl; });
-      }
+      QRCode.toDataURL(url, {
+        width: 84, margin: 1,
+        color: { dark: '#0e0e0e', light: '#f5f0e8' },
+        errorCorrectionLevel: 'H'
+      }, function(err, dataUrl){ if (!err) img.src = dataUrl; });
     });
   }
 
@@ -1820,8 +1826,8 @@
           localStorage.setItem(COURTESY_KEYS.summary, JSON.stringify(sumPayload));
         }
 
-        // Meseros (lista de meseros con sus contadores)
-        if (data.meseros && Array.isArray(data.meseros)) {
+        // Meseros — solo sobreescribir si el Sheet tiene datos
+        if (data.meseros && Array.isArray(data.meseros) && data.meseros.length > 0) {
           saveMeseros(data.meseros);
         }
 
