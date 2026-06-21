@@ -8,6 +8,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -666,6 +667,56 @@
     </div>
   </div>
 
+  <!-- ══ MESEROS · LA FONTANA ══ -->
+  <div class="stats-section" id="meseros-section" style="margin-bottom:16px; opacity:0; animation: up 0.5s ease 0.44s forwards;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-label" style="margin-bottom:0;color:#E8834D;">👨‍🍳 Meseros · La Fontana</div>
+      <div style="font-size:10px;color:var(--muted);font-weight:300;" id="meseros-count-label">Sin registros</div>
+    </div>
+
+    <!-- Totales globales -->
+    <div class="stats-grid" style="margin-bottom:8px;">
+      <div class="stat">
+        <div class="stat-num cream" id="meseros-total">0</div>
+        <div class="stat-label">Meseros<span class="sub">registrados</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color:#E8834D;" id="meseros-links-total">0</div>
+        <div class="stat-label">Links<span class="sub">abiertos</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="meseros-reviews-total">0</div>
+        <div class="stat-label">Reseñas<span class="sub">recibidas</span></div>
+      </div>
+    </div>
+
+    <!-- Agregar mesero -->
+    <div class="conversion-card" style="margin-bottom:8px;">
+      <div style="font-size:11px;color:var(--muted);font-weight:300;margin-bottom:10px;line-height:1.5;">
+        Cada mesero recibe un link único con QR. Las reseñas quedan registradas a su nombre.
+      </div>
+      <div style="display:flex;gap:8px;">
+        <input id="nuevo-mesero-nombre" type="text" placeholder="Nombre completo del mesero"
+          style="flex:1;background:var(--dark-2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-family:'Lato',sans-serif;font-size:14px;color:var(--cream);outline:none;-webkit-appearance:none;transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='rgba(232,131,77,0.45)'"
+          onblur="this.style.borderColor=''"
+          onkeydown="if(event.key==='Enter') addMesero()" />
+        <button onclick="addMesero()" style="background:#E8834D;color:var(--dark);border:none;border-radius:8px;padding:0 18px;font-family:'Lato',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;flex-shrink:0;">
+          Agregar
+        </button>
+      </div>
+      <div id="add-mesero-status" style="display:none;margin-top:8px;font-size:12px;border-radius:6px;padding:8px 10px;line-height:1.5;"></div>
+    </div>
+
+    <!-- Lista de meseros -->
+    <div id="meseros-feed" style="display:flex;flex-direction:column;gap:8px;">
+      <div id="meseros-empty" style="background:var(--dark-2);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;">
+        Aún no hay meseros registrados.<br>
+        <span style="opacity:0.55;">Ingresá el nombre de cada mesero para generar su link y QR.</span>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ RESEÑAS DEL RESTAURANTE · LA FONTANA ══ -->
   <div class="stats-section" id="restaurante-section" style="margin-bottom:16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -807,6 +858,26 @@
     Conectar a Google Sheets para datos compartidos.
   </div>
 
+</div>
+
+<!-- ══ MODAL QR MESERO ══ -->
+<div id="qr-modal" onclick="closeQRModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:200;align-items:center;justify-content:center;padding:20px;">
+  <div onclick="event.stopPropagation()" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px 24px 24px;max-width:300px;width:100%;text-align:center;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E8834D;margin-bottom:6px;">QR Mesero · La Fontana</div>
+    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#f5f0e8;margin-bottom:16px;" id="qr-modal-nombre">—</div>
+    <div style="background:#f5f0e8;border-radius:12px;padding:12px;display:inline-block;margin-bottom:14px;">
+      <canvas id="qr-canvas"></canvas>
+    </div>
+    <div style="font-size:10px;color:rgba(245,240,232,0.45);word-break:break-all;margin-bottom:16px;padding:0 4px;line-height:1.5;" id="qr-modal-url"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="copyQRUrl()" id="qr-copy-btn" style="flex:1;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);color:#C9A84C;border-radius:10px;padding:12px;font-family:'Lato',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background 0.15s;">
+        Copiar Link
+      </button>
+      <button onclick="closeQRModal()" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);color:rgba(245,240,232,0.45);border-radius:10px;padding:12px;font-family:'Lato',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+        Cerrar
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1318,6 +1389,166 @@
     });
   }
 
+  /* ── MESEROS · LA FONTANA ──────────────────────────────────── */
+  var MESEROS_KEY     = 'anfi_meseros';
+  var BASE_RESTO_URL  = window.location.origin + '/restaurante?mesero=';
+  var _qrCurrentUrl   = '';
+
+  function readMeseros() {
+    try { return JSON.parse(localStorage.getItem(MESEROS_KEY) || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveMeseros(list) { localStorage.setItem(MESEROS_KEY, JSON.stringify(list)); }
+
+  function slugify(nombre) {
+    var base = nombre.toLowerCase()
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+      .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    var suffix = Math.random().toString(36).slice(2,6);
+    return base.slice(0,20) + '-' + suffix;
+  }
+
+  function renderMeseros() {
+    var list     = readMeseros();
+    var feed     = document.getElementById('meseros-feed');
+    var empty    = document.getElementById('meseros-empty');
+    var countLbl = document.getElementById('meseros-count-label');
+
+    var totalLinks   = list.reduce(function(s,m){ return s+(m.links||0); }, 0);
+    var totalResenas = list.reduce(function(s,m){ return s+(m.resenas||0); }, 0);
+    var activos      = list.filter(function(m){ return m.activo !== false; });
+
+    document.getElementById('meseros-total').textContent        = activos.length;
+    document.getElementById('meseros-links-total').textContent  = totalLinks;
+    document.getElementById('meseros-reviews-total').textContent = totalResenas;
+    countLbl.textContent = list.length
+      ? list.length + (list.length === 1 ? ' mesero' : ' meseros')
+      : 'Sin registros';
+
+    feed.querySelectorAll('.mesero-card').forEach(function(el){ el.remove(); });
+
+    if (!list.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    list.forEach(function(m) {
+      var url  = BASE_RESTO_URL + encodeURIComponent(m.id);
+      var conv = m.links ? Math.round((m.resenas / m.links) * 100) : 0;
+      var card = document.createElement('div');
+      card.className = 'mesero-card';
+      card.style.cssText = 'background:var(--dark-2);border:1px solid var(--border);border-left:3px solid #E8834D;border-radius:10px;padding:14px;';
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
+          '<div>' +
+            '<div style="font-size:14px;font-weight:700;color:var(--cream);line-height:1.2;">' + escapeHtml(m.nombre) + '</div>' +
+            '<div style="font-size:10px;color:var(--muted);font-weight:300;margin-top:2px;font-family:monospace;letter-spacing:0.04em;">' + escapeHtml(m.id) + '</div>' +
+          '</div>' +
+          '<span style="font-size:9px;font-weight:700;letter-spacing:0.1em;padding:3px 8px;border-radius:10px;' +
+            (m.activo !== false
+              ? 'color:#00AA6C;background:rgba(0,170,108,0.12);'
+              : 'color:rgba(245,240,232,0.3);background:rgba(255,255,255,0.04);') +
+          '">' + (m.activo !== false ? 'ACTIVO' : 'INACTIVO') + '</span>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;">' +
+          _meseroStat(m.links || 0,   '#E8834D', 'Links',    'Abiertos') +
+          _meseroStat(m.resenas || 0, 'var(--gold)', 'Reseñas', 'Dadas') +
+          _meseroStat(conv + '%',     'var(--cream)', 'Tasa',   'Conv.') +
+        '</div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button onclick="showMeseroQR(\'' + escapeAttr(m.id) + '\',\'' + escapeAttr(m.nombre) + '\')" ' +
+            'style="flex:1;background:#E8834D;color:var(--dark);border:none;border-radius:8px;padding:9px;font-family:\'Lato\',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;">Ver QR</button>' +
+          '<button onclick="copyMeseroUrl(\'' + escapeAttr(m.id) + '\',this)" ' +
+            'style="flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:9px;font-family:\'Lato\',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent;">Copiar Link</button>' +
+        '</div>';
+      feed.appendChild(card);
+    });
+  }
+
+  function _meseroStat(val, color, label, sub) {
+    return '<div style="text-align:center;background:rgba(255,255,255,0.03);border-radius:8px;padding:8px 4px;">' +
+      '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:700;color:' + color + ';line-height:1;">' + val + '</div>' +
+      '<div style="font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:3px;">' + label + '<br>' + sub + '</div>' +
+      '</div>';
+  }
+
+  function escapeAttr(s) {
+    return (s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  }
+
+  function addMesero() {
+    var input  = document.getElementById('nuevo-mesero-nombre');
+    var nombre = (input.value || '').trim();
+    if (!nombre) { _meseroStatus('warn','⚠ Escribí el nombre del mesero.'); return; }
+
+    var id = slugify(nombre);
+    var list = readMeseros();
+    list.unshift({ id:id, nombre:nombre, activo:true, links:0, resenas:0 });
+    saveMeseros(list);
+    input.value = '';
+    renderMeseros();
+    _meseroStatus('ok','✓ ' + nombre + ' agregado. Tocá "Ver QR" para obtener su código.');
+
+    if (SCRIPT_URL && SCRIPT_URL !== 'PEGAR_URL_AQUI') {
+      fetch(SCRIPT_URL + '?action=register_mesero&id=' + encodeURIComponent(id) + '&nombre=' + encodeURIComponent(nombre))
+        .then(function(r){ return r.json(); })
+        .catch(function(){});
+    }
+  }
+
+  function _meseroStatus(type, msg) {
+    var el = document.getElementById('add-mesero-status');
+    var bg = type === 'ok'
+      ? 'background:rgba(0,170,108,0.1);color:#00AA6C;border:1px solid rgba(0,170,108,0.2);'
+      : 'background:rgba(201,168,76,0.1);color:#C9A84C;border:1px solid rgba(201,168,76,0.2);';
+    el.setAttribute('style', bg + 'display:block;margin-top:8px;font-size:12px;border-radius:6px;padding:8px 10px;line-height:1.5;');
+    el.textContent = msg;
+    setTimeout(function(){ el.style.display = 'none'; }, 5000);
+  }
+
+  function showMeseroQR(id, nombre) {
+    var url = BASE_RESTO_URL + encodeURIComponent(id);
+    _qrCurrentUrl = url;
+    document.getElementById('qr-modal-nombre').textContent = nombre;
+    document.getElementById('qr-modal-url').textContent    = url;
+
+    var canvas = document.getElementById('qr-canvas');
+    // Limpiar canvas previo
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    QRCode.toCanvas(canvas, url, {
+      width: 220, margin: 1,
+      color: { dark: '#0e0e0e', light: '#f5f0e8' },
+      errorCorrectionLevel: 'H'
+    }, function(err){ if(err) console.error(err); });
+
+    document.getElementById('qr-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeQRModal() {
+    document.getElementById('qr-modal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function copyQRUrl() {
+    if (!_qrCurrentUrl) return;
+    var btn = document.getElementById('qr-copy-btn');
+    navigator.clipboard && navigator.clipboard.writeText(_qrCurrentUrl).then(function(){
+      btn.textContent = '✓ Copiado';
+      setTimeout(function(){ btn.textContent = 'Copiar Link'; }, 2200);
+    });
+  }
+
+  function copyMeseroUrl(id, btn) {
+    var url = BASE_RESTO_URL + encodeURIComponent(id);
+    navigator.clipboard && navigator.clipboard.writeText(url).then(function(){
+      var orig = btn.textContent;
+      btn.textContent = '✓ Copiado';
+      setTimeout(function(){ btn.textContent = orig; }, 2200);
+    });
+  }
+
   function render() {
     const v = get(KEYS.visits);
     const g = get(KEYS.google);
@@ -1441,10 +1672,16 @@
           localStorage.setItem(COURTESY_KEYS.summary, JSON.stringify(sumPayload));
         }
 
+        // Meseros (lista de meseros con sus contadores)
+        if (data.meseros && Array.isArray(data.meseros)) {
+          saveMeseros(data.meseros);
+        }
+
         // Redibujar todo con los datos frescos
         render();
         renderSentiment();
         renderFeedback();
+        renderMeseros();
         renderRestaurant();
         renderEvento();
         renderServicio();
@@ -1497,6 +1734,7 @@
   render();
   renderSentiment();
   renderFeedback();
+  renderMeseros();
   renderRestaurant();
   renderEvento();
   renderServicio();

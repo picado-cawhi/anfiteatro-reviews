@@ -570,10 +570,10 @@
   var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzX_CJ18adp-bHzhXJfFrXr9MIG5WtYVsNSknn_dDUJnkz8WGOoriN7LuEDKUoLbeEQJg/exec';
   // ──────────────────────────────────────────────────────────────
 
-  var ratings = { servicio: 0, comida: 0 };
-  var salonero = new URLSearchParams(window.location.search).get('salonero')
-    || new URLSearchParams(window.location.search).get('server')
-    || '';
+  var ratings  = { servicio: 0, comida: 0 };
+  var _params  = new URLSearchParams(window.location.search);
+  var meseroId = _params.get('mesero') || '';
+  var salonero = meseroId || _params.get('salonero') || _params.get('server') || '';
 
   function setStar(group, n) {
     ratings[group] = n;
@@ -660,6 +660,8 @@
       salonero: salonero,
       comentario: comentario
     });
+    // Registrar reseña recibida para el mesero (si vino por su link)
+    if (meseroId) ping('mesero_event', { mesero_id: meseroId, type: 'review' });
 
     // Transicion a thanks (sin codigo todavia — se resuelve cuando responde el server)
     document.getElementById('code-wrap').style.display = 'none';
@@ -690,12 +692,13 @@
     setTimeout(function() { h.style.opacity = '0'; }, 1800);
   }
 
-  // Registrar visita
+  // Registrar visita + apertura de link del mesero
   if (salonero) {
-    document.getElementById('server-line').textContent = 'Salonero: ' + salonero;
+    document.getElementById('server-line').textContent = 'Atendido por: ' + salonero;
     document.getElementById('server-line').style.display = 'block';
   }
   ping('event', { type: 'visit', surface: 'restaurante' });
+  if (meseroId) ping('mesero_event', { mesero_id: meseroId, type: 'open' });
 </script>
 
 </body>

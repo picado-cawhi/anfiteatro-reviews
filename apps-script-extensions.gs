@@ -314,3 +314,120 @@ function jsonErr_(reason) {
   return ContentService.createTextOutput(JSON.stringify({ status: 'error', reason: reason }))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MESEROS · La Fontana del Anfiteatro
+   ═══════════════════════════════════════════════════════════════
+   Tracking individual por mesero en /restaurante?mesero=ID.
+   Hoja creada automáticamente: "Meseros"
+   Columnas: ID | Nombre | Activo | Links Abiertos | Reseñas Dadas | Fecha Registro
+
+   Agregar en doGet() del archivo principal:
+     if (action === 'register_mesero') return handleRegisterMesero(e);
+     if (action === 'mesero_event')    return handleMeseroEvent(e);
+     if (action === 'get_meseros')     return handleGetMeseros(e);
+     if (action === 'toggle_mesero')   return handleToggleMesero(e);
+
+   Agregar en getStats() antes del return:
+     stats.meseros = getMeserosList_();
+   ═══════════════════════════════════════════════════════════════ */
+
+const SHEET_MESEROS       = 'Meseros';
+const MESEROS_COL_ID      = 1;
+const MESEROS_COL_NOMBRE  = 2;
+const MESEROS_COL_ACTIVO  = 3;
+const MESEROS_COL_LINKS   = 4;
+const MESEROS_COL_RESENAS = 5;
+const MESEROS_COL_FECHA   = 6;
+
+/* ─────────────────────────────────────────────────────────────────
+   HANDLER · Registrar nuevo mesero
+   ?action=register_mesero&id=juan-p-x7k2&nombre=Juan%20Pérez
+   ───────────────────────────────────────────────────────────────── */
+function handleRegisterMesero(e) {
+  const id     = (e.parameter.id     || '').toString().trim().toLowerCase().replace(/[^a-z0-9\-]/g, '').slice(0, 40);
+  const nombre = (e.parameter.nombre || '').toString().trim().slice(0, 80);
+  if (!id || !nombre) return jsonErr_('missing_params');
+
+  const sh   = ensureSheet_(SHEET_MESEROS, ['ID','Nombre','Activo','Links Abiertos','Reseñas Dadas','Fecha Registro']);
+  const rows = sh.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if ((rows[i][0] || '').toString().toLowerCase() === id) return jsonErr_('id_exists');
+  }
+  sh.appendRow([id, nombre, 'Sí', 0, 0, Utilities.formatDate(new Date(), TZ_CR, 'dd/MM/yyyy HH:mm')]);
+  return jsonOk_({ id: id, nombre: nombre });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   HANDLER · Evento de mesero (apertura de link o reseña enviada)
+   ?action=mesero_event&mesero_id=juan-p-x7k2&type=open|review
+   ───────────────────────────────────────────────────────────────── */
+function handleMeseroEvent(e) {
+  const meseroId = (e.parameter.mesero_id || '').toString().trim().toLowerCase();
+  const type     = (e.parameter.type      || '').toString().trim().toLowerCase();
+  if (!meseroId || (type !== 'open' && type !== 'review')) return jsonErr_('invalid_params');
+
+  const sh   = ensureSheet_(SHEET_MESEROS, ['ID','Nombre','Activo','Links Abiertos','Reseñas Dadas','Fecha Registro']);
+  const rows = sh.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if ((rows[i][0] || '').toString().toLowerCase() === meseroId) {
+      const col     = (type === 'open') ? MESEROS_COL_LINKS : MESEROS_COL_RESENAS;
+      const current = parseInt(rows[i][col - 1]) || 0;
+      sh.getRange(i + 1, col).setValue(current + 1);
+      return jsonOk_({ mesero_id: meseroId, type: type, count: current + 1 });
+    }
+  }
+  // Mesero no encontrado — registrar el evento de todos modos
+  return jsonOk_({ mesero_id: meseroId, type: type, note: 'not_found' });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   HANDLER · Obtener lista de meseros con sus contadores
+   ?action=get_meseros
+   ───────────────────────────────────────────────────────────────── */
+function handleGetMeseros(e) {
+  return jsonOk_({ meseros: getMeserosList_() });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   HANDLER · Activar o desactivar un mesero
+   ?action=toggle_mesero&mesero_id=juan-p-x7k2&activo=Si|No
+   ───────────────────────────────────────────────────────────────── */
+function handleToggleMesero(e) {
+  const meseroId = (e.parameter.mesero_id || '').toString().trim().toLowerCase();
+  const activo   = (e.parameter.activo    || 'Si').toString().trim();
+  if (!meseroId) return jsonErr_('missing_params');
+
+  const sh   = ensureSheet_(SHEET_MESEROS, ['ID','Nombre','Activo','Links Abiertos','Reseñas Dadas','Fecha Registro']);
+  const rows = sh.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if ((rows[i][0] || '').toString().toLowerCase() === meseroId) {
+      const val = (activo === 'Si' || activo === 'true') ? 'Sí' : 'No';
+      sh.getRange(i + 1, MESEROS_COL_ACTIVO).setValue(val);
+      return jsonOk_({ mesero_id: meseroId, activo: val });
+    }
+  }
+  return jsonErr_('not_found');
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   INTERNAL · Leer hoja Meseros → array de objetos
+   ───────────────────────────────────────────────────────────────── */
+function getMeserosList_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName(SHEET_MESEROS);
+  if (!sh) return [];
+  const rows = sh.getDataRange().getValues();
+  const out  = [];
+  for (let i = 1; i < rows.length; i++) {
+    out.push({
+      id:      (rows[i][0] || '').toString(),
+      nombre:  (rows[i][1] || '').toString(),
+      activo:  !/^no/i.test((rows[i][2] || '').toString()),
+      links:   parseInt(rows[i][3]) || 0,
+      resenas: parseInt(rows[i][4]) || 0,
+      fecha:   (rows[i][5] || '').toString()
+    });
+  }
+  return out;
+}
