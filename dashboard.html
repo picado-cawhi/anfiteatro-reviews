@@ -667,10 +667,38 @@
     </div>
   </div>
 
-  <!-- ══ MESEROS · LA FONTANA ══ -->
+  <!-- ══ CÓDIGOS QR ══ -->
+  <div class="stats-section" style="margin-bottom:16px; opacity:0; animation: up 0.5s ease 0.41s forwards;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="section-label" style="margin-bottom:0;color:#5AACCA;">📱 Códigos QR</div>
+    </div>
+
+    <!-- QR Cavernas -->
+    <div style="background:var(--dark-2);border:1px solid var(--border);border-left:3px solid #5AACCA;border-radius:10px;padding:14px;margin-bottom:10px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#5AACCA;margin-bottom:10px;">🌿 Tour · Cavernas del Cañón</div>
+      <div style="display:flex;align-items:flex-start;gap:14px;">
+        <div style="background:#f5f0e8;border-radius:10px;padding:8px;flex-shrink:0;">
+          <canvas id="cavernas-qr-canvas" style="display:block;"></canvas>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;color:var(--cream);font-weight:700;margin-bottom:6px;line-height:1.4;">Encuesta de satisfacción<br><span style="font-weight:300;color:var(--muted);">Experiencia del tour</span></div>
+          <div id="cavernas-qr-url" style="font-size:10px;color:var(--muted);word-break:break-all;line-height:1.5;margin-bottom:10px;font-family:Lato,monospace;"></div>
+          <button onclick="copyCavernasLink(this)" style="font-size:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px 12px;color:var(--cream);font-family:Lato,sans-serif;cursor:pointer;">📋 Copiar link</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Grid Meseros -->
+    <div style="background:var(--dark-2);border:1px solid var(--border);border-left:3px solid #E8834D;border-radius:10px;padding:14px;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#E8834D;margin-bottom:10px;">👨‍🍳 QRs · Meseros Restaurante</div>
+      <div id="mesero-qr-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px;"></div>
+    </div>
+  </div>
+
+  <!-- ══ MESEROS · RESTAURANTE ══ -->
   <div class="stats-section" id="meseros-section" style="margin-bottom:16px; opacity:0; animation: up 0.5s ease 0.44s forwards;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="section-label" style="margin-bottom:0;color:#E8834D;">👨‍🍳 Meseros · La Fontana</div>
+      <div class="section-label" style="margin-bottom:0;color:#E8834D;">👨‍🍳 Meseros · Restaurante</div>
       <div style="font-size:10px;color:var(--muted);font-weight:300;" id="meseros-count-label">Sin registros</div>
     </div>
 
@@ -717,10 +745,10 @@
     </div>
   </div>
 
-  <!-- ══ RESEÑAS DEL RESTAURANTE · LA FONTANA ══ -->
+  <!-- ══ RESEÑAS DEL RESTAURANTE ══ -->
   <div class="stats-section" id="restaurante-section" style="margin-bottom:16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="section-label" style="margin-bottom:0;color:#C8643C;">🍷 Reseñas · La Fontana</div>
+      <div class="section-label" style="margin-bottom:0;color:#C8643C;">🍽️ Reseñas · Restaurante</div>
       <div style="font-size:10px;color:var(--muted);font-weight:300;" id="resto-count-label">Sin entradas</div>
     </div>
     <div class="stats-grid">
@@ -863,7 +891,7 @@
 <!-- ══ MODAL QR MESERO ══ -->
 <div id="qr-modal" onclick="closeQRModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:200;align-items:center;justify-content:center;padding:20px;">
   <div onclick="event.stopPropagation()" style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px 24px 24px;max-width:300px;width:100%;text-align:center;">
-    <div style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E8834D;margin-bottom:6px;">QR Mesero · La Fontana</div>
+    <div style="font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#E8834D;margin-bottom:6px;">QR Mesero · Restaurante</div>
     <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#f5f0e8;margin-bottom:16px;" id="qr-modal-nombre">—</div>
     <div style="background:#f5f0e8;border-radius:12px;padding:12px;display:inline-block;margin-bottom:14px;">
       <canvas id="qr-canvas"></canvas>
@@ -1203,6 +1231,29 @@
         '</div>' +
         '<div style="width:100%;height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;">' +
           '<div style="height:100%;background:' + (limitReached ? '#e05c5c' : cat.color) + ';border-radius:2px;width:' + pct + '%;transition:width 0.8s ease;"></div>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05);">' +
+          '<div style="font-size:11px;color:var(--muted);font-weight:300;">' +
+            '<span style="color:var(--cream);font-family:Lato,monospace;font-weight:700;">' + money(cost) + '</span>/código' +
+            ' · ' +
+            (limit === null
+              ? 'sin límite'
+              : 'límite <span style="color:var(--cream);font-family:Lato,monospace;font-weight:700;">' + money(limit) + '</span>') +
+          '</div>' +
+          '<button onclick="toggleCourtesyEdit(\'' + cat.key + '\')" style="font-size:10px;background:none;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 10px;color:var(--muted);font-family:Lato,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">✏️ Editar</button>' +
+        '</div>' +
+        '<div id="ce-' + cat.key + '" style="display:none;margin-top:10px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;">' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">' +
+            '<div>' +
+              '<div style="font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Costo ($)</div>' +
+              '<input type="number" min="0" step="0.01" inputmode="decimal" id="ce-cost-' + cat.key + '" value="' + cost + '" style="width:100%;box-sizing:border-box;background:var(--dark);border:1px solid var(--border);color:var(--cream);padding:8px 10px;border-radius:6px;font-family:Lato,monospace;font-size:14px;font-weight:700;outline:none;" />' +
+            '</div>' +
+            '<div>' +
+              '<div style="font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Límite mes ($)</div>' +
+              '<input type="number" min="0" step="1" inputmode="numeric" id="ce-lim-' + cat.key + '" value="' + (limit === null ? '' : limit) + '" placeholder="sin límite" style="width:100%;box-sizing:border-box;background:var(--dark);border:1px solid var(--border);color:var(--cream);padding:8px 10px;border-radius:6px;font-family:Lato,monospace;font-size:14px;font-weight:700;outline:none;" />' +
+            '</div>' +
+          '</div>' +
+          '<button onclick="saveCourtesyCardInline(\'' + cat.key + '\')" style="width:100%;background:' + cat.color + ';color:var(--dark);border:none;border-radius:6px;padding:9px;font-family:Lato,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;">Guardar</button>' +
         '</div>';
       container.appendChild(card);
     });
@@ -1307,6 +1358,31 @@
     el.style.color = colors[type] || 'var(--muted)';
   }
 
+  function toggleCourtesyEdit(key) {
+    var panel = document.getElementById('ce-' + key);
+    if (!panel) return;
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function saveCourtesyCardInline(key) {
+    var costEl = document.getElementById('ce-cost-' + key);
+    var limEl  = document.getElementById('ce-lim-' + key);
+    if (!costEl || !limEl) return;
+    var cost     = parseFloat(costEl.value);
+    var limitRaw = limEl.value.trim();
+    var limit    = limitRaw === '' ? null : parseFloat(limitRaw);
+    if (isNaN(cost) || cost < 0) { costEl.style.borderColor = '#e05c5c'; return; }
+    if (limit !== null && (isNaN(limit) || limit < 0)) { limEl.style.borderColor = '#e05c5c'; return; }
+    var cfg = readCourtesyConfig();
+    cfg[key] = { cost: cost, limit: limit };
+    localStorage.setItem(COURTESY_KEYS.config, JSON.stringify(cfg));
+    if (SCRIPT_URL && SCRIPT_URL !== 'PEGAR_URL_AQUI') {
+      fetch(SCRIPT_URL + '?action=set_courtesy_config&config=' + encodeURIComponent(JSON.stringify(cfg)))
+        .catch(function(){});
+    }
+    renderCourtesies();
+  }
+
   /* ── RESEÑAS EVENTOS ──────────────────────────────────────── */
   function renderEvento() {
     var list = readReviewList(KEYS.evento);
@@ -1400,6 +1476,77 @@
   }
   function saveMeseros(list) { localStorage.setItem(MESEROS_KEY, JSON.stringify(list)); }
 
+  var BASE_CAVE_URL = window.location.origin + '/';
+
+  function initDefaultMeseros() {
+    if (readMeseros().length > 0) return;
+    var defaults = ['Andrea','Michelle','Reina','Edgar','Heidy','Roy','Josh'];
+    var list = defaults.map(function(n) {
+      return { id: n.toLowerCase(), nombre: n, activo: true, links: 0, resenas: 0 };
+    });
+    saveMeseros(list);
+    if (SCRIPT_URL && SCRIPT_URL !== 'PEGAR_URL_AQUI') {
+      list.forEach(function(m) {
+        fetch(SCRIPT_URL + '?action=register_mesero&id=' + encodeURIComponent(m.id) + '&nombre=' + encodeURIComponent(m.nombre))
+          .catch(function(){});
+      });
+    }
+  }
+
+  function copyCavernasLink(btn) {
+    navigator.clipboard && navigator.clipboard.writeText(BASE_CAVE_URL).then(function(){
+      btn.textContent = '✓ Copiado';
+      setTimeout(function(){ btn.textContent = '📋 Copiar link'; }, 1800);
+    });
+  }
+
+  function renderCavernasQR() {
+    var urlEl = document.getElementById('cavernas-qr-url');
+    if (urlEl) urlEl.textContent = BASE_CAVE_URL;
+    var canvas = document.getElementById('cavernas-qr-canvas');
+    if (!canvas || typeof QRCode === 'undefined') return;
+    QRCode.toCanvas(canvas, BASE_CAVE_URL, {
+      width: 160, margin: 1,
+      color: { dark: '#0e0e0e', light: '#f5f0e8' },
+      errorCorrectionLevel: 'H'
+    }, function(err){ if (err) console.error('QR Cavernas:', err); });
+  }
+
+  function renderMeseroQRGrid() {
+    var container = document.getElementById('mesero-qr-grid');
+    if (!container) return;
+    container.innerHTML = '';
+    var list = readMeseros().filter(function(m){ return m.activo !== false; });
+    if (!list.length) {
+      container.innerHTML = '<p style="font-size:11px;color:var(--muted);grid-column:1/-1;padding:4px 0;margin:0;">Sin meseros activos — agregalos abajo.</p>';
+      return;
+    }
+    list.forEach(function(m) {
+      var url = BASE_RESTO_URL + encodeURIComponent(m.id);
+      var div = document.createElement('div');
+      div.style.cssText = 'text-align:center;';
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'background:#f5f0e8;border-radius:8px;padding:6px;display:inline-block;margin-bottom:5px;';
+      var img = document.createElement('img');
+      img.style.cssText = 'width:84px;height:84px;display:block;';
+      img.alt = m.nombre;
+      wrap.appendChild(img);
+      var nameEl = document.createElement('div');
+      nameEl.style.cssText = 'font-size:10px;font-weight:700;color:var(--cream);letter-spacing:0.04em;line-height:1.3;';
+      nameEl.textContent = m.nombre;
+      div.appendChild(wrap);
+      div.appendChild(nameEl);
+      container.appendChild(div);
+      if (typeof QRCode !== 'undefined') {
+        QRCode.toDataURL(url, {
+          width: 84, margin: 1,
+          color: { dark: '#0e0e0e', light: '#f5f0e8' },
+          errorCorrectionLevel: 'H'
+        }, function(err, dataUrl){ if (!err) img.src = dataUrl; });
+      }
+    });
+  }
+
   function slugify(nombre) {
     var base = nombre.toLowerCase()
       .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
@@ -1486,7 +1633,8 @@
     saveMeseros(list);
     input.value = '';
     renderMeseros();
-    _meseroStatus('ok','✓ ' + nombre + ' agregado. Tocá "Ver QR" para obtener su código.');
+    renderMeseroQRGrid();
+    _meseroStatus('ok','✓ ' + nombre + ' agregado.');
 
     if (SCRIPT_URL && SCRIPT_URL !== 'PEGAR_URL_AQUI') {
       fetch(SCRIPT_URL + '?action=register_mesero&id=' + encodeURIComponent(id) + '&nombre=' + encodeURIComponent(nombre))
@@ -1682,6 +1830,7 @@
         renderSentiment();
         renderFeedback();
         renderMeseros();
+        renderMeseroQRGrid();
         renderRestaurant();
         renderEvento();
         renderServicio();
@@ -1731,10 +1880,13 @@
 
   // ── ARRANQUE ─────────────────────────────────────────────────────
   // 1. Dibujar desde localStorage inmediatamente (rapido, sin red)
+  initDefaultMeseros();
   render();
   renderSentiment();
   renderFeedback();
   renderMeseros();
+  renderCavernasQR();
+  renderMeseroQRGrid();
   renderRestaurant();
   renderEvento();
   renderServicio();
