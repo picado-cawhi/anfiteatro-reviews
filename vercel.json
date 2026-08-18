@@ -1,12 +1,11 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [
-    { "source": "/review",      "destination": "/review.html" },
-    { "source": "/dashboard",   "destination": "/dashboard.html" },
-    { "source": "/restaurante", "destination": "/restaurante.html" },
-    { "source": "/evento",      "destination": "/evento.html" },
-    { "source": "/servicio",    "destination": "/servicio.html" },
-    { "source": "/menu",        "destination": "/menu.html" }
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://anfiteatro-reviews-rho.vercel.app/$1",
+      "permanent": false
+    }
   ]
 }
